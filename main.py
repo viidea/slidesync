@@ -4,6 +4,7 @@ from PyQt4 import QtGui
 from PyQt4.QtCore import QDir, Qt, QString
 from PyQt4.QtGui import QMessageBox
 import video
+from video_view import VideoView
 
 logger = logging.getLogger(__name__)
 
@@ -12,8 +13,10 @@ class MainWindow(QtGui.QMainWindow):
 
     def __init__(self):
         super(MainWindow, self).__init__()
-        self.setGeometry(300, 300, 640, 480)
+        self.setGeometry(300, 300, 1280, 800)
         self.setWindowTitle("VSync")
+        self.setMinimumWidth(300)
+        self.setMinimumHeight(300)
 
         # Prepare toolbar
         loadFileAction = QtGui.QAction("Load video...", self)
@@ -26,13 +29,16 @@ class MainWindow(QtGui.QMainWindow):
         self.status_label = QtGui.QLabel("Status")
         self.status_label.setAlignment(Qt.AlignLeft)
         self.statusBar().addWidget(self.status_label, stretch=1)
-
+        # Video format statusbar widget
         self.video_label = QtGui.QLabel("")
         self.video_label.setMinimumWidth(150)
         self.video_label.setAlignment(Qt.AlignRight)
         self.statusBar().addWidget(self.video_label)
         self.status_ready()
 
+        video_label = QtGui.QLabel()
+        self.setCentralWidget(video_label)
+        self.video_view = VideoView(video_label)
         self.show()
 
     def click_load_video(self):
@@ -52,6 +58,7 @@ class MainWindow(QtGui.QMainWindow):
 
         self.status_ready()
         self.video_label.setText(unicode(self.video_file.get_info()))
+        self.video_view.show_frame(self.video_file.get_next_frame()[1])
 
     def status_ready(self):
         self.status_label.setText("Ready.")

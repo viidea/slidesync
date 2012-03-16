@@ -47,9 +47,15 @@ class VideoFile(object):
         self.info = VideoInfo(self.source.video_format.width, self.source.video_format.width, self.source.audio_format.channels, self.source.audio_format.sample_rate)
 
     def get_frame(self):
+        if self.current_frame_timestamp is None or self.current_frame is None:
+            return self.get_next_frame()
+        return self.current_frame_timestamp, self.current_frame
+
+    def get_next_frame(self):
         self.current_frame_timestamp = self.source.get_next_video_timestamp()
         self.current_frame = self.source.get_next_video_frame()
         logger.debug("[VideoFile] Got frame at %s." % (self.current_frame_timestamp,))
+        return self.current_frame_timestamp, self.current_frame
 
     def get_info(self):
         return self.info
