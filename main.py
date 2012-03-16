@@ -36,9 +36,8 @@ class MainWindow(QtGui.QMainWindow):
         self.statusBar().addWidget(self.video_label)
         self.status_ready()
 
-        video_label = QtGui.QLabel()
-        self.setCentralWidget(video_label)
-        self.video_view = VideoView(video_label)
+        self.video_view = VideoView()
+        self.setCentralWidget(self.video_view)
         self.show()
 
     def click_load_video(self):
