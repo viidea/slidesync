@@ -1,8 +1,11 @@
 import logging
 import sys
 from PyQt4 import QtGui
+from threading import Thread
+import threading
 from PyQt4.QtCore import QDir, Qt, QString
 from PyQt4.QtGui import QMessageBox
+import time
 import video
 from video_view import VideoView
 
@@ -11,8 +14,9 @@ logger = logging.getLogger(__name__)
 class MainWindow(QtGui.QMainWindow):
     video_file = None
 
-    def __init__(self):
+    def __init__(self, app):
         super(MainWindow, self).__init__()
+        self.app = app
         self.setGeometry(300, 300, 1280, 800)
         self.setWindowTitle("VSync")
         self.setMinimumWidth(300)
@@ -24,6 +28,10 @@ class MainWindow(QtGui.QMainWindow):
         loadFileAction.triggered.connect(self.click_load_video)
         self.toolbar = self.addToolBar("Main")
         self.toolbar.addAction(loadFileAction)
+
+        processAction = QtGui.QAction("Process", self)
+        processAction.triggered.connect(self.start_processing)
+        self.toolbar.addAction(processAction)
 
         # Prepare status bar
         self.status_label = QtGui.QLabel("Status")
@@ -59,6 +67,10 @@ class MainWindow(QtGui.QMainWindow):
         self.video_label.setText(unicode(self.video_file.get_info()))
         self.video_view.show_frame(self.video_file.get_next_frame()[1])
 
+
+    def start_processing(self):
+        pass
+
     def status_ready(self):
         self.status_label.setText("Ready.")
         self.status_label.update()
@@ -70,7 +82,7 @@ def main():
     logging.basicConfig()
 
     app = QtGui.QApplication(sys.argv)
-    window = MainWindow()
+    window = MainWindow(app)
     sys.exit(app.exec_())
 
 if __name__ == "__main__":

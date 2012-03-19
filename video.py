@@ -14,23 +14,26 @@ class VideoInfo(object):
     height = None
     audio_channels = None
     audio_samplerate = None
+    fps = None
 
-    def __init__(self, width, height, channels, samplerate):
+    def __init__(self, width, height, fps, channels, samplerate):
         self.width = width
         self.height = height
         self.audio_channels = channels
         self.audio_samplerate = samplerate
+        self.fps = fps
 
     def __unicode__(self):
         return self.__str__()
 
     def __str__(self):
-        return "[V:%sx%s][A:%sch %sHz]" % (self.width, self.height, self.audio_channels, self.audio_samplerate)
+        return "[V:%sx%s %s fps][A:%sch %sHz]" % (self.width, self.height, self.fps, self.audio_channels, self.audio_samplerate)
 
 class VideoFile(object):
     info = None
-    current_frame = None
-    current_frame_timestamp = None
+    _current_frame = None
+    _current_frame_timestamp = None
+    _fps = None
 
     def __init__(self, filepath):
         self.filepath = unicode(filepath)
@@ -44,18 +47,31 @@ class VideoFile(object):
         except IOError as e:
             raise VideoLoadException("Could not load video file.\n%s" % (e,))
 
-        self.info = VideoInfo(self.source.video_format.width, self.source.video_format.width, self.source.audio_format.channels, self.source.audio_format.sample_rate)
+        self._determine_fps()
+        self.info = VideoInfo(self.source.video_format.width, self.source.video_format.width, self._fps, self.source.audio_format.channels, self.source.audio_format.sample_rate)
 
     def get_frame(self):
-        if self.current_frame_timestamp is None or self.current_frame is None:
+        if self._current_frame_timestamp is None or self._current_frame is None:
             return self.get_next_frame()
-        return self.current_frame_timestamp, self.current_frame
+        return self._current_frame_timestamp, self._current_frame
 
     def get_next_frame(self):
-        self.current_frame_timestamp = self.source.get_next_video_timestamp()
-        self.current_frame = self.source.get_next_video_frame()
-        logger.debug("[VideoFile] Got frame at %s." % (self.current_frame_timestamp,))
-        return self.current_frame_timestamp, self.current_frame
+        self._current_frame_timestamp = self.source.get_next_video_timestamp()
+        self._current_frame = self.source.get_next_video_frame()
+        logger.debug("[VideoFile] Got frame at %s." % (self._current_frame_timestamp,))
+        return self._current_frame_timestamp, self._current_frame
+
+    def _determine_fps(self):
+        """
+        This consumes one frame to determine FPS
+        """
+        if self._current_frame_timestamp is None:
+            self.get_frame()
+
+        current_timestamp = self._current_frame_timestamp
+        diff = self.source.get_next_video_timestamp() - current_timestamp
+        self._fps = 1.0 / diff
+        return self._fps
 
     def get_info(self):
         return self.info
