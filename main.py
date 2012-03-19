@@ -6,6 +6,7 @@ import threading
 from PyQt4.QtCore import QDir, Qt, QString
 from PyQt4.QtGui import QMessageBox
 import time
+from processor import VideoProcessor
 import video
 from video_view import VideoView
 
@@ -69,7 +70,8 @@ class MainWindow(QtGui.QMainWindow):
 
 
     def start_processing(self):
-        pass
+        processor = VideoProcessor(self.video_file)
+        processor.start()
 
     def status_ready(self):
         self.status_label.setText("Ready.")
