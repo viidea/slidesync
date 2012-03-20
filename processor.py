@@ -1,53 +1,87 @@
 from cv2 import cv
+import numpy
 
 class VideoProcessor(object):
-    SKIP_COUNT = 25
-    TRESHOLD = 1
+    SKIP_COUNT = 50
+    TRESHOLD = 3
 
-    def __init__(self, video_file, callback=None, grayscale=False):
-        self.video_file = video_file
-        self.callback = callback
+    def __init__(self, video_file, cropbox=None, callback=None, grayscale=False):
+        self._video_file = video_file
+        self._callback = callback
+        self._cropbox = cropbox
+
         if grayscale:
-            self.channels = 1
+            self._channels = 1
         else:
-            self.channels = 3
+            self._channels = 3
 
     def start(self):
-        pixel_count = self.video_file.info.width * self.video_file.info.height * self.channels
+        if self._cropbox is not None:
+            x, y, width, height = self._cropbox
+        else:
+            x = 0
+            y = 0
+            width = self._video_file.info.width
+            height = self._video_file.info.height
+
+        pixel_count = width * height * self._channels
 
         current_frame = None
         timestamp = None
         frame = None
+
         while True:
             for i in range(0, self.SKIP_COUNT):
-                timestamp, frame = self.video_file.get_next_frame()
+                timestamp, frame = self._video_file.get_next_frame()
 
             if timestamp is None:
                 print "Done!"
                 break
 
             assert frame.format == "RGB"
+            # Crop frame if possible
+            region = frame.get_region(x, y, width, height).get_image_data()
+            cv_frame = cv.CreateImage((width, height), cv.IPL_DEPTH_8U, 3)      # Allocate image
+            cv.SetData(cv_frame, region.get_data("RGB", width * 3), width * 3)  # Set data from frame
 
-            # Convert frame to openCV
-            color_frame = cv.CreateImage((frame.width, frame.height), cv.IPL_DEPTH_8U, 3)      # Allocate image
-            cv.SetData(color_frame, frame.data, frame.pitch)                                   # Set data from frame
-            cv_frame = cv.CreateImage(cv.GetSize(color_frame), cv.IPL_DEPTH_8U, self.channels) # Converted image
-
-            if self.channels == 1:
-                cv.CvtColor(color_frame, cv_frame, cv.CV_RGB2GRAY)
+            if self._channels == 1:     # Grayscale
+                gray_frame = cv.CreateImage(cv.GetSize(cv_frame), cv.IPL_DEPTH_8U, 1)
+                cv.CvtColor(cv_frame, gray_frame, cv.CV_RGB2GRAY)
+                self._fix_contrast(gray_frame)
+                cv.Threshold(gray_frame, gray_frame, 50, 255, cv.CV_THRESH_BINARY)
+                cv_frame = gray_frame
             else:
-                cv.CvtColor(color_frame, cv_frame, cv.CV_RGB2BGR)
+                r = cv.CreateImage(cv.GetSize(cv_frame), cv.IPL_DEPTH_8U, 1)
+                g = cv.CreateImage(cv.GetSize(cv_frame), cv.IPL_DEPTH_8U, 1)
+                b = cv.CreateImage(cv.GetSize(cv_frame), cv.IPL_DEPTH_8U, 1)
+                cv.Split(cv_frame, r, g, b, None)
+                self._fix_contrast(r)
+                self._fix_contrast(g)
+                self._fix_contrast(b)
+                cv.Merge(b, g, r, None, cv_frame)
+
+
+            cv.Smooth(cv_frame, cv_frame, smoothtype=cv.CV_GAUSSIAN)
 
             if current_frame is None:
                 current_frame = cv_frame
 
             # Calculate image diff
-            diff = cv.CreateImage(cv.GetSize(cv_frame), cv.IPL_DEPTH_8U, self.channels)
+            diff = cv.CreateImage(cv.GetSize(cv_frame), cv.IPL_DEPTH_8U, self._channels)
             cv.AbsDiff(current_frame, cv_frame, diff)
             difference = sum(cv.Sum(diff)) / pixel_count        # Normalize difference with pixel count
 
             if difference > self.TRESHOLD:
-                current_frame = cv_frame
-                cv.SaveImage("/tmp/%s.png" % (timestamp,) , cv_frame)
+                cv.SaveImage("/tmp/sync/%s.png" % (timestamp,) , cv_frame)
+            current_frame = cv_frame
 
             print difference
+
+    def _fix_contrast(self, image):
+        minval, maxval, minloc, maxloc = cv.MinMaxLoc(image)
+        range = maxval - minval
+        range_factor = 255.0 * (1.0 / range)
+        cv.SubS(image, minval, image)
+        cv.Scale(image, image, scale=range_factor)
+
+

@@ -70,7 +70,7 @@ class MainWindow(QtGui.QMainWindow):
 
 
     def start_processing(self):
-        processor = VideoProcessor(self.video_file)
+        processor = VideoProcessor(self.video_file, cropbox=(220, 50, 820, 560), grayscale=False)
         processor.start()
 
     def status_ready(self):
