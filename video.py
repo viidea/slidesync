@@ -1,5 +1,5 @@
 import logging
-from lib import avbin
+import pyglet
 
 logger = logging.getLogger(__name__)
 
@@ -43,8 +43,8 @@ class VideoFile(object):
 
     def load(self):
         try:
-            self.source = avbin.AVbinSource(self.filepath)
-        except avbin.AVbinException as e:
+            self.source = pyglet.media.load(self.filepath)
+        except pyglet.media.MediaException as e:
             raise VideoLoadException("Unknown video format.\n%s" % (e,))
         except IOError as e:
             raise VideoLoadException("Could not load video file.\n%s" % (e,))
