@@ -71,7 +71,7 @@ class MainWindow(QtGui.QMainWindow):
 
     def start_processing(self):
         processor = VideoProcessor(self.video_file, cropbox=(220, 50, 820, 560), grayscale=False)
-        processor.start()
+        processor.extract_slides()
 
     def status_ready(self):
         self.status_label.setText("Ready.")

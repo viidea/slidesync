@@ -1,9 +1,13 @@
 from cv2 import cv
+import logging
+import os
 import numpy
+
+logger = logging.getLogger(__name__)
 
 class VideoProcessor(object):
     SKIP_COUNT = 50
-    TRESHOLD = 3
+    TRESHOLD = 4
 
     def __init__(self, video_file, cropbox=None, callback=None, grayscale=False):
         self._video_file = video_file
@@ -15,7 +19,15 @@ class VideoProcessor(object):
         else:
             self._channels = 3
 
-    def start(self):
+    def _create_temp_dir(self):
+        try:
+            os.mkdir("/tmp/sync/")
+        except IOError:
+            logger.error("Failed to create temporary directory for slide extraction!")
+
+    def extract_slides(self):
+        self._create_temp_dir()
+
         if self._cropbox is not None:
             x, y, width, height = self._cropbox
         else:
@@ -25,7 +37,6 @@ class VideoProcessor(object):
             height = self._video_file.info.height
 
         pixel_count = width * height * self._channels
-
         current_frame = None
         timestamp = None
         frame = None
@@ -35,7 +46,7 @@ class VideoProcessor(object):
                 timestamp, frame = self._video_file.get_next_frame()
 
             if timestamp is None:
-                print "Done!"
+                logger.info("Extraction done!")
                 break
 
             assert frame.format == "RGB"
@@ -60,7 +71,6 @@ class VideoProcessor(object):
                 self._fix_contrast(b)
                 cv.Merge(b, g, r, None, cv_frame)
 
-
             cv.Smooth(cv_frame, cv_frame, smoothtype=cv.CV_GAUSSIAN)
 
             if current_frame is None:
@@ -72,10 +82,9 @@ class VideoProcessor(object):
             difference = sum(cv.Sum(diff)) / pixel_count        # Normalize difference with pixel count
 
             if difference > self.TRESHOLD:
-                cv.SaveImage("/tmp/sync/%s.png" % (timestamp,) , cv_frame)
+                # Save frame to disk
+                frame.save("/tmp/sync/%s (%s).png" % (timestamp, difference,))
             current_frame = cv_frame
-
-            print difference
 
     def _fix_contrast(self, image):
         minval, maxval, minloc, maxloc = cv.MinMaxLoc(image)
@@ -83,5 +92,3 @@ class VideoProcessor(object):
         range_factor = 255.0 * (1.0 / range)
         cv.SubS(image, minval, image)
         cv.Scale(image, image, scale=range_factor)
-
-
