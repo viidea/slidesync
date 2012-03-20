@@ -6,6 +6,7 @@ import threading
 from PyQt4.QtCore import QDir, Qt, QString
 from PyQt4.QtGui import QMessageBox
 import time
+import datetime
 from processor import VideoProcessor
 import video
 from video_view import VideoView
@@ -85,9 +86,16 @@ class MainWindow(QtGui.QMainWindow):
         self.progress_bar.setVisible(True)
         self.progress_bar.setMaximum(self.video_file.get_info().duration)
         self.progress_bar.setMinimum(0.0)
+
+        start = datetime.datetime.now()
         processor = VideoProcessor(self.video_file, cropbox=(220, 50, 820, 560), grayscale=False, callback=self.update_progress)
         processor.extract_slides()
+        end = datetime.datetime.now()
         self.status_ready()
+
+        processing_time = end - start
+        msgBox = QMessageBox(QMessageBox.Information, "Woot", "Processing took %s " % (processing_time,))
+        msgBox.exec_()
 
     def status_ready(self):
         self.status_label.setText("Ready.")
