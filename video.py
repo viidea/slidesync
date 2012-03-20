@@ -15,19 +15,21 @@ class VideoInfo(object):
     audio_channels = None
     audio_samplerate = None
     fps = None
+    duration = None
 
-    def __init__(self, width, height, fps, channels, samplerate):
+    def __init__(self, width, height, fps, channels, samplerate, duration):
         self.width = width
         self.height = height
         self.audio_channels = channels
         self.audio_samplerate = samplerate
         self.fps = fps
+        self.duration = duration
 
     def __unicode__(self):
         return self.__str__()
 
     def __str__(self):
-        return "[V:%sx%s %s fps][A:%sch %sHz]" % (self.width, self.height, self.fps, self.audio_channels, self.audio_samplerate)
+        return "[V:%sx%s %s fps][A:%sch %sHz] %s s" % (self.width, self.height, self.fps, self.audio_channels, self.audio_samplerate, self.duration)
 
 class VideoFile(object):
     info = None
@@ -48,7 +50,12 @@ class VideoFile(object):
             raise VideoLoadException("Could not load video file.\n%s" % (e,))
 
         self._determine_fps()
-        self.info = VideoInfo(self.source.video_format.width, self.source.video_format.width, self._fps, self.source.audio_format.channels, self.source.audio_format.sample_rate)
+        self.info = VideoInfo(self.source.video_format.width,
+                              self.source.video_format.width,
+                              self._fps,
+                              self.source.audio_format.channels,
+                              self.source.audio_format.sample_rate,
+                              self.source.duration)
 
     def get_frame(self):
         if self._current_frame_timestamp is None or self._current_frame is None:

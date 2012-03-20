@@ -38,6 +38,12 @@ class MainWindow(QtGui.QMainWindow):
         self.status_label = QtGui.QLabel("Status")
         self.status_label.setAlignment(Qt.AlignLeft)
         self.statusBar().addWidget(self.status_label, stretch=1)
+        # Processing statusbar progres bar
+        self.progress_bar = QtGui.QProgressBar()
+        self.progress_bar.setMinimumWidth(200)
+        self.progress_bar.setVisible(False)
+        self.progress_bar.setAlignment(Qt.AlignRight)
+        self.statusBar().addWidget(self.progress_bar)
         # Video format statusbar widget
         self.video_label = QtGui.QLabel("")
         self.video_label.setMinimumWidth(150)
@@ -68,10 +74,20 @@ class MainWindow(QtGui.QMainWindow):
         self.video_label.setText(unicode(self.video_file.get_info()))
         self.video_view.show_frame(self.video_file.get_next_frame()[1])
 
+    def update_progress(self, seconds, frame=None):
+        if frame is not None:
+            self.video_view.show_frame(frame)
+        self.progress_bar.setValue(seconds)
+        self.app.processEvents()
 
     def start_processing(self):
-        processor = VideoProcessor(self.video_file, cropbox=(220, 50, 820, 560), grayscale=False)
+        self.status_label.setText("Extracting slides...")
+        self.progress_bar.setVisible(True)
+        self.progress_bar.setMaximum(self.video_file.get_info().duration)
+        self.progress_bar.setMinimum(0.0)
+        processor = VideoProcessor(self.video_file, cropbox=(220, 50, 820, 560), grayscale=False, callback=self.update_progress)
         processor.extract_slides()
+        self.status_ready()
 
     def status_ready(self):
         self.status_label.setText("Ready.")

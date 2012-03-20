@@ -1,7 +1,6 @@
 from cv2 import cv
 import logging
 import os
-import numpy
 
 logger = logging.getLogger(__name__)
 
@@ -24,6 +23,8 @@ class VideoProcessor(object):
             os.mkdir("/tmp/sync/")
         except IOError:
             logger.error("Failed to create temporary directory for slide extraction!")
+        except OSError as e:
+            logger.error(e)
 
     def extract_slides(self):
         self._create_temp_dir()
@@ -84,7 +85,15 @@ class VideoProcessor(object):
             if difference > self.TRESHOLD:
                 # Save frame to disk
                 frame.save("/tmp/sync/%s (%s).png" % (timestamp, difference,))
+                self._send_callback(timestamp, current_frame=frame)
+            else:
+                self._send_callback(timestamp)
+
             current_frame = cv_frame
+
+    def _send_callback(self, timestamp, current_frame = None):
+        if self._callback is not None:
+            self._callback(timestamp, frame=current_frame)
 
     def _fix_contrast(self, image):
         minval, maxval, minloc, maxloc = cv.MinMaxLoc(image)
