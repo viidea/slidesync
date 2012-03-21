@@ -123,11 +123,13 @@ class MainWindow(QtGui.QMainWindow):
 
         image_slides = []
         num = 0
-        for file in sorted(os.listdir("/storage/djangomeet/Django14/")):
+
+        DIR = "/storage/djangomeet/Django14/"
+        for file in sorted(os.listdir(DIR)):
             filename, extension = os.path.splitext(file)
             if extension == ".png":
                 logger.debug("Found slide %s" % file)
-                image_slides.append((num, image_slides))
+                image_slides.append((num, os.path.join(DIR, file)))
                 num += 1
 
         matcher = SlideMatcher(self.slides, image_slides)
