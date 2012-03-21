@@ -32,7 +32,7 @@ class MainWindow(QtGui.QMainWindow):
         self.toolbar.addAction(loadFileAction)
 
         processAction = QtGui.QAction("Process", self)
-        processAction.triggered.connect(self.start_processing)
+        processAction.triggered.connect(self.do_processing)
         self.toolbar.addAction(processAction)
 
         # Prepare status bar
@@ -81,15 +81,16 @@ class MainWindow(QtGui.QMainWindow):
         self.progress_bar.setValue(seconds)
         self.app.processEvents()
 
-    def start_processing(self):
+    def do_processing(self):
         self.status_label.setText("Extracting slides...")
         self.progress_bar.setVisible(True)
         self.progress_bar.setMaximum(self.video_file.get_info().duration)
         self.progress_bar.setMinimum(0.0)
 
         start = datetime.datetime.now()
-        processor = SlideExtractor(self.video_file, cropbox=(220, 50, 820, 560), grayscale=False, callback=self.update_progress)
-        processor.extract_slides()
+        extractor = SlideExtractor(self.video_file, cropbox=(220, 50, 820, 560), grayscale=False, callback=self.update_progress)
+        slides = extractor.extract_slides()
+        logger.debug("Slides: %s" % (slides,))
         end = datetime.datetime.now()
         self.status_ready()
 
@@ -99,13 +100,14 @@ class MainWindow(QtGui.QMainWindow):
 
     def status_ready(self):
         self.status_label.setText("Ready.")
+        self.progress_bar.setVisible(False)
         self.status_label.update()
 
 def main():
     """
     Main application entry point
     """
-    logging.basicConfig()
+    logging.basicConfig(level=logging.DEBUG)
 
     app = QtGui.QApplication(sys.argv)
     window = MainWindow(app)

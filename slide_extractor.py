@@ -18,14 +18,6 @@ class SlideExtractor(object):
         else:
             self._channels = 3
 
-    def _create_temp_dir(self):
-        try:
-            os.mkdir("/tmp/sync/")
-        except IOError:
-            logger.error("Failed to create temporary directory for slide extraction!")
-        except OSError as e:
-            logger.error(e)
-
     def extract_slides(self):
         self._create_temp_dir()
 
@@ -41,6 +33,8 @@ class SlideExtractor(object):
         current_frame = None
         timestamp = None
         frame = None
+
+        slides = []
 
         while True:
             for i in range(0, self.SKIP_COUNT):
@@ -84,12 +78,25 @@ class SlideExtractor(object):
 
             if difference > self.TRESHOLD:
                 # Save frame to disk
-                frame.save("/tmp/sync/%s (%s).png" % (timestamp, difference,))
+                filepath = "/tmp/sync/%s (%s).png" % (timestamp, difference,)
+                frame.save(filepath)
                 self._send_callback(timestamp, current_frame=frame)
+
+                slides.append((timestamp, filepath))
             else:
                 self._send_callback(timestamp)
 
             current_frame = cv_frame
+
+        return slides
+
+    def _create_temp_dir(self):
+        try:
+            os.mkdir("/tmp/sync/")
+        except IOError:
+            logger.warning("Failed to create temporary directory for slide extraction!")
+        except OSError as e:
+            logger.error(e)
 
     def _send_callback(self, timestamp, current_frame = None):
         if self._callback is not None:

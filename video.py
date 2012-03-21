@@ -65,7 +65,7 @@ class VideoFile(object):
     def get_next_frame(self):
         self._current_frame_timestamp = self.source.get_next_video_timestamp()
         self._current_frame = self.source.get_next_video_frame()
-        logger.debug("[VideoFile] Got frame at %s." % (self._current_frame_timestamp,))
+        logger.trace("[VideoFile] Got frame at %s." % (self._current_frame_timestamp,))
         return self._current_frame_timestamp, self._current_frame
 
     def _determine_fps(self):
