@@ -15,6 +15,7 @@ logger = logging.getLogger(__name__)
 
 class MainWindow(QtGui.QMainWindow):
     video_file = None
+    slides = None
 
     def __init__(self, app):
         super(MainWindow, self).__init__()
@@ -31,9 +32,13 @@ class MainWindow(QtGui.QMainWindow):
         self.toolbar = self.addToolBar("Main")
         self.toolbar.addAction(loadFileAction)
 
-        processAction = QtGui.QAction("Process", self)
-        processAction.triggered.connect(self.do_processing)
-        self.toolbar.addAction(processAction)
+        extractAction = QtGui.QAction("Extract slides", self)
+        extractAction.triggered.connect(self.extract_slides)
+        self.toolbar.addAction(extractAction)
+
+        matchAction = QtGui.QAction("Match slides", self)
+        matchAction.triggered.connect(self.match_slides)
+        self.toolbar.addAction(matchAction)
 
         # Prepare status bar
         self.status_label = QtGui.QLabel("Status")
@@ -75,13 +80,13 @@ class MainWindow(QtGui.QMainWindow):
         self.video_label.setText(unicode(self.video_file.get_info()))
         self.video_view.show_frame(self.video_file.get_next_frame()[1])
 
-    def update_progress(self, seconds, frame=None):
+    def update_progress(self, value, frame=None):
         if frame is not None:
             self.video_view.show_frame(frame)
-        self.progress_bar.setValue(seconds)
+        self.progress_bar.setValue(value)
         self.app.processEvents()
 
-    def do_processing(self):
+    def extract_slides(self):
         self.status_label.setText("Extracting slides...")
         self.progress_bar.setVisible(True)
         self.progress_bar.setMaximum(self.video_file.get_info().duration)
@@ -89,13 +94,27 @@ class MainWindow(QtGui.QMainWindow):
 
         start = datetime.datetime.now()
         extractor = SlideExtractor(self.video_file, cropbox=(220, 50, 820, 560), grayscale=False, callback=self.update_progress)
-        slides = extractor.extract_slides()
+        self.slides = extractor.extract_slides()    # TODO: fix
         logger.debug("Slides: %s" % (slides,))
         end = datetime.datetime.now()
         self.status_ready()
 
         processing_time = end - start
-        msgBox = QMessageBox(QMessageBox.Information, "Woot", "Processing took %s " % (processing_time,))
+        msgBox = QMessageBox(QMessageBox.Information, "Woot", "Extracting took %s " % (processing_time,))
+        msgBox.exec_()
+
+    def match_slides(self):
+        self.status_label.setText("Matching slides...")
+        self.progress_bar.setVisible(True)
+        self.progress_bar.setMinimum(0)
+        self.progress_bar.setMaximum(0)
+
+        start = datetime.datetime.now()
+        end = datetime.datetime.now()
+        self.status_ready()
+
+        processing_time = end - start
+        msgBox = QMessageBox(QMessageBox.Information, "Woot", "Matching took %s " % (processing_time,))
         msgBox.exec_()
 
     def status_ready(self):
