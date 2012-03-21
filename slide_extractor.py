@@ -4,7 +4,7 @@ import os
 
 logger = logging.getLogger(__name__)
 
-class VideoProcessor(object):
+class SlideExtractor(object):
     SKIP_COUNT = 50
     TRESHOLD = 4
 

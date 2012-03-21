@@ -7,7 +7,7 @@ from PyQt4.QtCore import QDir, Qt, QString
 from PyQt4.QtGui import QMessageBox
 import time
 import datetime
-from processor import VideoProcessor
+from slide_extractor import SlideExtractor
 import video
 from video_view import VideoView
 
@@ -88,7 +88,7 @@ class MainWindow(QtGui.QMainWindow):
         self.progress_bar.setMinimum(0.0)
 
         start = datetime.datetime.now()
-        processor = VideoProcessor(self.video_file, cropbox=(220, 50, 820, 560), grayscale=False, callback=self.update_progress)
+        processor = SlideExtractor(self.video_file, cropbox=(220, 50, 820, 560), grayscale=False, callback=self.update_progress)
         processor.extract_slides()
         end = datetime.datetime.now()
         self.status_ready()
