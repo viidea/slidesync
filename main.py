@@ -1,4 +1,5 @@
 import logging
+import os
 import sys
 from PyQt4 import QtGui
 from threading import Thread
@@ -8,6 +9,7 @@ from PyQt4.QtGui import QMessageBox
 import time
 import datetime
 from slide_extractor import SlideExtractor
+from slide_matcher import SlideMatcher
 import video
 from video_view import VideoView
 
@@ -15,7 +17,9 @@ logger = logging.getLogger(__name__)
 
 class MainWindow(QtGui.QMainWindow):
     video_file = None
-    slides = None
+
+    # TODO: remove debug
+    slides = [(2.2, '/tmp/sync/2.2 (1073741824).png'), (200.2, '/tmp/sync/200.2 (4.74319468641).png'), (206.2, '/tmp/sync/206.2 (133.433372532).png'), (222.2, '/tmp/sync/222.2 (5.924389518).png'), (260.2, '/tmp/sync/260.2 (6.29094584785).png'), (362.2, '/tmp/sync/362.2 (7.35102932636).png'), (436.2, '/tmp/sync/436.2 (6.95023954704).png'), (618.2, '/tmp/sync/618.2 (9.37152656794).png'), (676.2, '/tmp/sync/676.2 (8.71631387921).png'), (798.2, '/tmp/sync/798.2 (8.23237369338).png'), (896.2, '/tmp/sync/896.2 (10.9022742451).png'), (898.2, '/tmp/sync/898.2 (34.614716899).png')]
 
     def __init__(self, app):
         super(MainWindow, self).__init__()
@@ -95,7 +99,7 @@ class MainWindow(QtGui.QMainWindow):
         start = datetime.datetime.now()
         extractor = SlideExtractor(self.video_file, cropbox=(220, 50, 820, 560), grayscale=False, callback=self.update_progress)
         self.slides = extractor.extract_slides()    # TODO: fix
-        logger.debug("Slides: %s" % (slides,))
+        logger.debug("Slides: %s" % (self.slides,))
         end = datetime.datetime.now()
         self.status_ready()
 
@@ -104,12 +108,31 @@ class MainWindow(QtGui.QMainWindow):
         msgBox.exec_()
 
     def match_slides(self):
+        if self.slides is None:
+            return
+
         self.status_label.setText("Matching slides...")
         self.progress_bar.setVisible(True)
         self.progress_bar.setMinimum(0)
         self.progress_bar.setMaximum(0)
 
         start = datetime.datetime.now()
+
+        # Get slide files first
+        # TODO: make interface for this
+
+        image_slides = []
+        num = 0
+        for file in sorted(os.listdir("/storage/djangomeet/Django14/")):
+            filename, extension = os.path.splitext(file)
+            if extension == ".png":
+                logger.debug("Found slide %s" % file)
+                image_slides.append((num, image_slides))
+                num += 1
+
+        matcher = SlideMatcher(self.slides, image_slides)
+        matcher.match_slides()
+
         end = datetime.datetime.now()
         self.status_ready()
 

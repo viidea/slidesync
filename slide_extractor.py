@@ -69,12 +69,12 @@ class SlideExtractor(object):
             cv.Smooth(cv_frame, cv_frame, smoothtype=cv.CV_GAUSSIAN)
 
             if current_frame is None:
-                current_frame = cv_frame
-
-            # Calculate image diff
-            diff = cv.CreateImage(cv.GetSize(cv_frame), cv.IPL_DEPTH_8U, self._channels)
-            cv.AbsDiff(current_frame, cv_frame, diff)
-            difference = sum(cv.Sum(diff)) / pixel_count        # Normalize difference with pixel count
+                difference = 2**30      # Make sure to grab first frame
+            else:
+                # Calculate image diff
+                diff = cv.CreateImage(cv.GetSize(cv_frame), cv.IPL_DEPTH_8U, self._channels)
+                cv.AbsDiff(current_frame, cv_frame, diff)
+                difference = sum(cv.Sum(diff)) / pixel_count        # Normalize difference with pixel count
 
             if difference > self.TRESHOLD:
                 # Save frame to disk
