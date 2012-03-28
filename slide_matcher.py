@@ -1,6 +1,8 @@
 import logging
 import cv
 import numpy
+from numpy.core.numeric import array
+from numpy.matlib import zeros
 
 logger = logging.getLogger(__name__)
 
@@ -60,47 +62,41 @@ class SlideMatcher(object):
     def _calculate_distance_matrix(self):
         distances = {}
         count = 0
-        for v_time, v_slide in self.video_slides.items():
+        for i_num, i_slide in self.image_slides.items():
             count += 1
-            distances[v_time] = {}
-            for i_time, i_slide in self.image_slides.items():
-                distances[v_time][i_time] = self._calculate_descriptor_set_distance(v_slide.keypoints, v_slide.descriptors, i_slide.keypoints, i_slide.descriptors)
+            distances[i_num] = {}
+            for v_time, v_slide in self.video_slides.items():
+                dst = self._calculate_descriptor_set_distance(v_slide.keypoints, v_slide.descriptors, i_slide.keypoints, i_slide.descriptors)
+                if dst is not None:
+                    distances[i_num][v_time] = dst
 
-            print distances[v_time]
+            print distances[i_num]
             logger.debug("%s/%s" % (count, len(self.video_slides)))
         return distances
 
     def _calculate_descriptor_set_distance(self, v_keypoints, v_descriptors, i_keypoints, i_descriptors):
         distances = []
-        for v in range(0, len(v_descriptors)):
-            v_d = v_descriptors[v]
-            v_k = v_keypoints[v]
-            distances.append(self._get_neighbour_distance(v_k, v_d, i_keypoints, i_descriptors))
-        return sum(distances) / len(distances)
+        # Find matching descriptors and discard non-matching
+        for i_d in i_descriptors:
+            dst = []
+            for v_d in v_descriptors:
+                distance = self._get_descriptor_distance(i_d, v_d)
+                dst.append(distance)
+                if len(dst) > 10:           # We only need to find first two candidates
+                    dst = sorted(dst)[:2]
 
-    def _get_neighbour_distance(self, v_keypoint, v_descriptor, i_keypoints, i_descriptors):
-        assert len(i_keypoints) == len(i_descriptors)
-        best = float("inf")
-
-        for i in range(0, len(i_descriptors)):
-            if v_keypoint[2] != i_keypoints[i][2]:      # Laplacian
+            # Ignore descriptors that don't have enough difference between first and second match - bad matches
+            dst = sorted(dst)
+            if len(dst) < 2 or dst[0] < dst[1] * 0.6:
                 continue
 
-            dist = self._get_descriptor_distance(v_descriptor, i_descriptors[i])
-            if dist < best:
-                best = dist
+            distances.append(dst[0])
 
-        if best == float("inf"):
-            return 0
-        else:
-            return best
+        if len(distances) > 0:
+            return len(distances), sum(distances) / len(distances)
+        return None
 
-    def _get_descriptor_distance(self, d1, d2):
-        assert len(d1) == len(d2)
-        vals = []
-        for i in range(0, len(d1)):
-            num = d1[i] - d2[i]
-            num = num*num
-            vals.append(num)
-        return sum(vals)
-
+    def _get_descriptor_distance(self, a, b):
+        a_arr = numpy.array(a)
+        b_arr = numpy.array(b)
+        return numpy.linalg.norm(a_arr-b_arr)
