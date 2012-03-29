@@ -3,6 +3,7 @@ import cv
 import numpy
 from numpy.core.numeric import array
 from numpy.matlib import zeros
+import operator
 
 logger = logging.getLogger(__name__)
 
@@ -45,17 +46,21 @@ class SlideMatcher(object):
 
     def match_slides(self):
         logger.info("Extracting features from video slides...")
-        self._extract_features(self.video_slides)
+        self._extract_features(self.video_slides, flip=True)
         logger.info("Extracting features from image slides...")
         self._extract_features(self.image_slides)
         logger.info("Calculating distance matrix...")
         self._calculate_distance_matrix()
 
-    def _extract_features(self, slides):
+    def _extract_features(self, slides, flip=False):
         for slide in slides.values():
             logger.debug("Extracting from %s..." % slide.image_path)
             image = cv.LoadImageM(slide.image_path, iscolor=cv.CV_LOAD_IMAGE_GRAYSCALE)
-            keypoints, descriptors = cv.ExtractSURF(image, None, cv.CreateMemStorage(), (0, 3000, 3, 1))
+
+            if flip:
+                cv.Flip(image)
+
+            keypoints, descriptors = cv.ExtractSURF(image, None, cv.CreateMemStorage(), (1, 300, 3, 4))
             slide.keypoints = keypoints
             slide.descriptors = descriptors
 
@@ -70,33 +75,43 @@ class SlideMatcher(object):
                 if dst is not None:
                     distances[i_num][v_time] = dst
 
+            distances[i_num] = sorted(distances[i_num].iteritems(), key=operator.itemgetter(1))
             print distances[i_num]
             logger.debug("%s/%s" % (count, len(self.video_slides)))
         return distances
 
+    def _weight_timing_scores(self):
+        pass
+
     def _calculate_descriptor_set_distance(self, v_keypoints, v_descriptors, i_keypoints, i_descriptors):
         distances = []
         # Find matching descriptors and discard non-matching
-        for i_d in i_descriptors:
+        for i in range(0, len(i_descriptors)):
+            i_d = i_descriptors[i]
             dst = []
-            for v_d in v_descriptors:
+            for v in range(0, len(v_descriptors)):
+                v_d = v_descriptors[v]
+
+                # Check laplacian
+                if i_keypoints[i][1] != v_keypoints[v][1]:
+                    continue
+
                 distance = self._get_descriptor_distance(i_d, v_d)
                 dst.append(distance)
-                if len(dst) > 10:           # We only need to find first two candidates
-                    dst = sorted(dst)[:2]
 
             # Ignore descriptors that don't have enough difference between first and second match - bad matches
             dst = sorted(dst)
-            if len(dst) < 2 or dst[0] < dst[1] * 0.6:
+            if len(dst) < 2 or dst[0] / dst[1] > 0.5:
                 continue
 
             distances.append(dst[0])
 
         if len(distances) > 0:
-            return len(distances), sum(distances) / len(distances)
+            return len(distances)
         return None
 
     def _get_descriptor_distance(self, a, b):
         a_arr = numpy.array(a)
         b_arr = numpy.array(b)
-        return numpy.linalg.norm(a_arr-b_arr)
+        sum = (a_arr - b_arr) ** 2
+        return numpy.sum(sum)

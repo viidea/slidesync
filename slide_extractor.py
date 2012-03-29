@@ -79,7 +79,7 @@ class SlideExtractor(object):
             if difference > self.TRESHOLD:
                 # Save frame to disk
                 filepath = "/tmp/sync/%s (%s).png" % (timestamp, difference,)
-                frame.save(filepath)
+                cv.SaveImage(filepath, cv_frame)
                 self._send_callback(timestamp, current_frame=frame)
 
                 slides.append((timestamp, filepath))
