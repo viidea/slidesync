@@ -1,5 +1,6 @@
 import logging
 import cv
+import cv2
 import numpy
 from numpy.core.numeric import array
 from numpy.matlib import zeros
@@ -31,6 +32,8 @@ class Slide(object):
 
 
 class SlideMatcher(object):
+    DESCRIPTOR_SIZE = 64
+
     video_slides = {}
     image_slides = {}
 
@@ -46,72 +49,45 @@ class SlideMatcher(object):
 
     def match_slides(self):
         logger.info("Extracting features from video slides...")
-        self._extract_features(self.video_slides, flip=True)
+        self._extract_features(self.video_slides)
         logger.info("Extracting features from image slides...")
         self._extract_features(self.image_slides)
         logger.info("Calculating distance matrix...")
         self._calculate_distance_matrix()
 
-    def _extract_features(self, slides, flip=False):
+    def _extract_features(self, slides):
+        surf = cv2.SURF(_hessianThreshold=3500, _extended=True)
+        numpy.seterr(all="raise")
         for slide in slides.values():
             logger.debug("Extracting from %s..." % slide.image_path)
-            image = cv.LoadImageM(slide.image_path, iscolor=cv.CV_LOAD_IMAGE_GRAYSCALE)
-
-            if flip:
-                cv.Flip(image)
-
-            keypoints, descriptors = cv.ExtractSURF(image, None, cv.CreateMemStorage(), (1, 300, 3, 4))
+            image = cv2.imread(slide.image_path, cv2.CV_LOAD_IMAGE_GRAYSCALE)
+            keypoints, descriptors = surf.detect(image, None, False)
+            # Reshape descriptors so they'll make sense
+            descriptors.shape = (-1, surf.descriptorSize())
             slide.keypoints = keypoints
             slide.descriptors = descriptors
 
     def _calculate_distance_matrix(self):
-        distances = {}
-        count = 0
-        for i_num, i_slide in self.image_slides.items():
-            count += 1
-            distances[i_num] = {}
-            for v_time, v_slide in self.video_slides.items():
-                dst = self._calculate_descriptor_set_distance(v_slide.keypoints, v_slide.descriptors, i_slide.keypoints, i_slide.descriptors)
-                if dst is not None:
-                    distances[i_num][v_time] = dst
+        candidates = []
 
-            distances[i_num] = sorted(distances[i_num].iteritems(), key=operator.itemgetter(1))
-            print distances[i_num]
-            logger.debug("%s/%s" % (count, len(self.video_slides)))
-        return distances
+        for v_time, v_slide in self.video_slides.items():
+            distances = []
+            for i_num, i_slide in self.image_slides.items():
+                # Use FLANN detector to find nearest neighbours
+                neighbours = self._get_nearest_neighbours_flann(v_slide.descriptors, i_slide.descriptors, 0.9)
+                score = len(neighbours)
+                distances.append((score, i_slide.image_path))
 
-    def _weight_timing_scores(self):
-        pass
+            distances = sorted(distances)
+            candidates.append((v_slide.image_path, distances[-1][1], distances))
 
-    def _calculate_descriptor_set_distance(self, v_keypoints, v_descriptors, i_keypoints, i_descriptors):
-        distances = []
-        # Find matching descriptors and discard non-matching
-        for i in range(0, len(i_descriptors)):
-            i_d = i_descriptors[i]
-            dst = []
-            for v in range(0, len(v_descriptors)):
-                v_d = v_descriptors[v]
+        for cnd in sorted(candidates):
+            print cnd
 
-                # Check laplacian
-                if i_keypoints[i][1] != v_keypoints[v][1]:
-                    continue
-
-                distance = self._get_descriptor_distance(i_d, v_d)
-                dst.append(distance)
-
-            # Ignore descriptors that don't have enough difference between first and second match - bad matches
-            dst = sorted(dst)
-            if len(dst) < 2 or dst[0] / dst[1] > 0.5:
-                continue
-
-            distances.append(dst[0])
-
-        if len(distances) > 0:
-            return len(distances)
-        return None
-
-    def _get_descriptor_distance(self, a, b):
-        a_arr = numpy.array(a)
-        b_arr = numpy.array(b)
-        sum = (a_arr - b_arr) ** 2
-        return numpy.sum(sum)
+    def _get_nearest_neighbours_flann(self, descriptors1, descriptors2, treshold = 0.6):
+        # Build index
+        flann = cv2.flann_Index(features=descriptors2, params=dict(algorithm = 1, trees = 4))  # FLANN_INDEX_KDTREE = 1
+        indexes2, distances = flann.knnSearch(descriptors1, 2, params={})    # Find 2 nearest neighbours
+        indexes1 = numpy.arange(len(descriptors1))                          # Prepare indexes for zip
+        pairs = zip(indexes1, indexes2[:, 0], distances[:, 0], distances[:,0] / distances[:,1]) # Build pairs of indexes with first neighbour with distance
+        return filter(lambda item: item[3] > treshold, pairs)
