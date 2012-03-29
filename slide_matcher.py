@@ -1,3 +1,4 @@
+from collections import defaultdict
 import logging
 import cv
 import cv2
@@ -56,7 +57,7 @@ class SlideMatcher(object):
         self._calculate_distance_matrix()
 
     def _extract_features(self, slides):
-        surf = cv2.SURF(_hessianThreshold=3500, _extended=True)
+        surf = cv2.SURF(_hessianThreshold=300)
         numpy.seterr(all="raise")
         for slide in slides.values():
             logger.debug("Extracting from %s..." % slide.image_path)
@@ -68,26 +69,41 @@ class SlideMatcher(object):
             slide.descriptors = descriptors
 
     def _calculate_distance_matrix(self):
-        candidates = []
+        mapping, flann_index = self._get_flann_index(self.image_slides)
 
+        results = []
         for v_time, v_slide in self.video_slides.items():
-            distances = []
-            for i_num, i_slide in self.image_slides.items():
-                # Use FLANN detector to find nearest neighbours
-                neighbours = self._get_nearest_neighbours_flann(v_slide.descriptors, i_slide.descriptors, 0.9)
-                score = len(neighbours)
-                distances.append((score, i_slide.image_path))
+            # Use FLANN detector to find nearest neighbours
+            neighbours = self._get_nearest_neighbours_flann(flann_index, v_slide.descriptors, 0.3)
 
-            distances = sorted(distances)
-            candidates.append((v_slide.image_path, distances[-1][1], distances))
+            counts = defaultdict(int)
+            for neighbour in neighbours:
+                counts[mapping[neighbour[1]]] += 1
+            list = [(val, self.image_slides[idx].image_path) for idx, val in counts.items()]
+            results.append((v_slide.image_path, sorted(list)))
 
-        for cnd in sorted(candidates):
-            print cnd
+        for result in sorted(results):
+            print result
 
-    def _get_nearest_neighbours_flann(self, descriptors1, descriptors2, treshold = 0.6):
+
+    def _get_flann_index(self, images):
+        descriptors = tuple([image.descriptors for i_num, image in images.items()])
+        # Stack descriptors together
+        stack = numpy.vstack(descriptors)
+
+        mapping = {}
+        idx = 0
+        for i_num, image in images.items():
+            for i in range(0, len(image.descriptors)):
+                mapping[idx] = i_num
+                idx += 1
+
+        flann = cv2.flann_Index(features=stack, params=dict(algorithm = 1, trees = 4))
+        return mapping, flann
+
+    def _get_nearest_neighbours_flann(self, index, descriptors, treshold = 0.6):
         # Build index
-        flann = cv2.flann_Index(features=descriptors2, params=dict(algorithm = 1, trees = 4))  # FLANN_INDEX_KDTREE = 1
-        indexes2, distances = flann.knnSearch(descriptors1, 2, params={})    # Find 2 nearest neighbours
-        indexes1 = numpy.arange(len(descriptors1))                          # Prepare indexes for zip
-        pairs = zip(indexes1, indexes2[:, 0], distances[:, 0], distances[:,0] / distances[:,1]) # Build pairs of indexes with first neighbour with distance
+        indexes, distances = index.knnSearch(descriptors, 2, params={})    # Find 2 nearest neighbours
+        indexes1 = numpy.arange(len(descriptors))                          # Prepare indexes for zip
+        pairs = zip(indexes1, indexes[:, 0], distances[:, 0], distances[:,0] / distances[:,1]) # Build pairs of indexes with first neighbour with distance
         return filter(lambda item: item[3] > treshold, pairs)
