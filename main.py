@@ -8,6 +8,7 @@ import datetime
 from slide_extractor import SlideExtractor
 from slide_matcher import SlideMatcher
 import video
+from widgets.slide_button import SlideButton
 
 logger = logging.getLogger(__name__)
 
@@ -123,14 +124,10 @@ class MainWindow(QtGui.QMainWindow):
         for i in reversed(range(self.slide_list.count())):
             self.slide_list.removeWidget(self.slide_list.itemAt(i))
 
-        policy = QtGui.QSizePolicy(QtGui.QSizePolicy.MinimumExpanding, QtGui.QSizePolicy.MinimumExpanding)
         for image_slide in self.image_slides:
             num, path = image_slide
-            btn = QtGui.QPushButton()
-            btn.setSizePolicy(policy)
-            btn.setIcon(QtGui.QIcon(path))
-            btn.setCheckable(True)
-            self.slide_list.addWidget(btn)
+            img = SlideButton(image_file=path)
+            self.slide_list.addWidget(img)
 
     def _build_window_content(self):
         # Prepare toolbar
@@ -163,7 +160,9 @@ class MainWindow(QtGui.QMainWindow):
         slides_label.setSizePolicy(label_size_policy)
         main_box.addWidget(slides_label)
         self.slide_list = QtGui.QHBoxLayout()
-        main_box.addLayout(self.slide_list)
+        slide_scroll = QtGui.QScrollArea()
+        slide_scroll.setLayout(self.slide_list)
+        main_box.addWidget(slide_scroll)
         # Video frames
         frames_label= QtGui.QLabel("Video frames")
         frames_label.setSizePolicy(label_size_policy)
