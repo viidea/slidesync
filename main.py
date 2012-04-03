@@ -2,16 +2,12 @@ import logging
 import os
 import sys
 from PyQt4 import QtGui
-from threading import Thread
-import threading
-from PyQt4.QtCore import QDir, Qt, QString
+from PyQt4.QtCore import QDir, Qt
 from PyQt4.QtGui import QMessageBox
-import time
 import datetime
 from slide_extractor import SlideExtractor
 from slide_matcher import SlideMatcher
 import video
-from video_view import VideoView
 
 logger = logging.getLogger(__name__)
 
@@ -73,6 +69,7 @@ class MainWindow(QtGui.QMainWindow):
             return
 
         self.image_slides = image_slides
+        self._show_image_slides()
         self.status_ready()
 
     def update_progress(self, value, frame=None):
@@ -121,6 +118,19 @@ class MainWindow(QtGui.QMainWindow):
         self.status_label.setText("Ready.")
         self.progress_bar.setVisible(False)
         self.status_label.update()
+
+    def _show_image_slides(self):
+        for i in reversed(range(self.slide_list.count())):
+            self.slide_list.removeWidget(self.slide_list.itemAt(i))
+
+        policy = QtGui.QSizePolicy(QtGui.QSizePolicy.MinimumExpanding, QtGui.QSizePolicy.MinimumExpanding)
+        for image_slide in self.image_slides:
+            num, path = image_slide
+            btn = QtGui.QPushButton()
+            btn.setSizePolicy(policy)
+            btn.setIcon(QtGui.QIcon(path))
+            btn.setCheckable(True)
+            self.slide_list.addWidget(btn)
 
     def _build_window_content(self):
         # Prepare toolbar
