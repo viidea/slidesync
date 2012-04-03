@@ -44,6 +44,31 @@ class MainWindow(QtGui.QMainWindow):
         matchAction.triggered.connect(self.match_slides)
         self.toolbar.addAction(matchAction)
 
+        # Prepare main content area
+        central_widget = QtGui.QWidget()
+        self.setCentralWidget(central_widget)
+        main_box = QtGui.QVBoxLayout()
+        central_widget.setLayout(main_box)
+        label_size_policy = QtGui.QSizePolicy(QtGui.QSizePolicy.Expanding, QtGui.QSizePolicy.Fixed) # Expand horizontally only
+        # Slide list
+        slides_label = QtGui.QLabel("Available slides")
+        slides_label.setSizePolicy(label_size_policy)
+        main_box.addWidget(slides_label)
+        self.slide_list = QtGui.QHBoxLayout()
+        main_box.addLayout(self.slide_list)
+        # Video frames
+        frames_label= QtGui.QLabel("Video frames")
+        frames_label.setSizePolicy(label_size_policy)
+        main_box.addWidget(frames_label)
+        self.frame_list = QtGui.QHBoxLayout()
+        main_box.addLayout(self.frame_list)
+        # Matched slides
+        matched_label = QtGui.QLabel("Matched slides")
+        matched_label.setSizePolicy(label_size_policy)
+        main_box.addWidget(matched_label)
+        self.matched_list = QtGui.QHBoxLayout()
+        main_box.addLayout(self.matched_list)
+
         # Prepare status bar
         self.status_label = QtGui.QLabel("Status")
         self.status_label.setAlignment(Qt.AlignLeft)
@@ -60,9 +85,6 @@ class MainWindow(QtGui.QMainWindow):
         self.video_label.setAlignment(Qt.AlignRight)
         self.statusBar().addWidget(self.video_label)
         self.status_ready()
-
-        self.video_view = VideoView()
-        self.setCentralWidget(self.video_view)
         self.show()
 
     def click_load_video(self):
@@ -85,8 +107,6 @@ class MainWindow(QtGui.QMainWindow):
         self.video_view.show_frame(self.video_file.get_next_frame()[1])
 
     def update_progress(self, value, frame=None):
-        if frame is not None:
-            self.video_view.show_frame(frame)
         self.progress_bar.setValue(value)
         self.app.processEvents()
 
