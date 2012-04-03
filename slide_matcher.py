@@ -74,7 +74,7 @@ class SlideMatcher(object):
         results = []
         for v_time, v_slide in self.video_slides.items():
             # Use FLANN detector to find nearest neighbours
-            neighbours = self._get_nearest_neighbours_flann(flann_index, v_slide.descriptors, 0.3)
+            neighbours = self._get_nearest_neighbours_flann(flann_index, v_slide.descriptors, -1)
 
             counts = defaultdict(int)
             for neighbour in neighbours:
@@ -105,5 +105,5 @@ class SlideMatcher(object):
         # Build index
         indexes, distances = index.knnSearch(descriptors, 2, params={})    # Find 2 nearest neighbours
         indexes1 = numpy.arange(len(descriptors))                          # Prepare indexes for zip
-        pairs = zip(indexes1, indexes[:, 0], distances[:, 0], distances[:,0] / distances[:,1]) # Build pairs of indexes with first neighbour with distance
+        pairs = zip(indexes1, indexes[:, 0], distances[:, 0], distances[:,0] / (distances[:,1] + numpy.finfo(float).eps)) # Build pairs of indexes with first neighbour with distance
         return filter(lambda item: item[3] > treshold, pairs)
