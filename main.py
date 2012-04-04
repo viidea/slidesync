@@ -121,13 +121,17 @@ class MainWindow(QtGui.QMainWindow):
         self.status_label.update()
 
     def _show_image_slides(self):
-        for i in reversed(range(self.slide_list.count())):
-            self.slide_list.removeWidget(self.slide_list.itemAt(i))
+
+        widget = QtGui.QWidget()
+        layout = QtGui.QHBoxLayout()
 
         for image_slide in self.image_slides:
             num, path = image_slide
             img = SlideButton(image_file=path)
-            self.slide_list.addWidget(img)
+            layout.addWidget(img)
+        widget.setLayout(layout)
+        self.slide_scroll.setWidget(widget)
+        widget.show()
 
     def _build_window_content(self):
         # Prepare toolbar
@@ -159,22 +163,29 @@ class MainWindow(QtGui.QMainWindow):
         slides_label = QtGui.QLabel("Available slides")
         slides_label.setSizePolicy(label_size_policy)
         main_box.addWidget(slides_label)
-        self.slide_list = QtGui.QHBoxLayout()
-        slide_scroll = QtGui.QScrollArea()
-        slide_scroll.setLayout(self.slide_list)
-        main_box.addWidget(slide_scroll)
+
+        self.slide_scroll = QtGui.QScrollArea(self)
+        self.slide_scroll.setVerticalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
+        self.slide_scroll.setWidgetResizable(True)
+        main_box.addWidget(self.slide_scroll)
+
         # Video frames
         frames_label= QtGui.QLabel("Video frames")
         frames_label.setSizePolicy(label_size_policy)
         main_box.addWidget(frames_label)
-        self.frame_list = QtGui.QHBoxLayout()
-        main_box.addLayout(self.frame_list)
+        self.video_scroll = QtGui.QScrollArea(self)
+        self.video_scroll.setVerticalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
+        self.video_scroll.setWidgetResizable(True)
+        main_box.addWidget(self.video_scroll)
         # Matched slides
         matched_label = QtGui.QLabel("Matched slides")
         matched_label.setSizePolicy(label_size_policy)
         main_box.addWidget(matched_label)
-        self.matched_list = QtGui.QHBoxLayout()
-        main_box.addLayout(self.matched_list)
+
+        self.matched_scroll = QtGui.QScrollArea(self)
+        self.matched_scroll.setVerticalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
+        self.matched_scroll.setWidgetResizable(True)
+        main_box.addWidget(self.matched_scroll)
 
         # Prepare status bar
         self.status_label = QtGui.QLabel("Status")
