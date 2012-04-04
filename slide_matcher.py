@@ -54,7 +54,7 @@ class SlideMatcher(object):
         logger.info("Extracting features from image slides...")
         self._extract_features(self.image_slides)
         logger.info("Calculating distance matrix...")
-        self._calculate_distance_matrix()
+        return self._calculate_distance_matrix()
 
     def _extract_features(self, slides):
         surf = cv2.SURF(_hessianThreshold=300)
@@ -79,11 +79,13 @@ class SlideMatcher(object):
             counts = defaultdict(int)
             for neighbour in neighbours:
                 counts[mapping[neighbour[1]]] += 1
-            list = [(val, self.image_slides[idx].image_path) for idx, val in counts.items()]
-            results.append((v_slide.image_path, sorted(list)))
+            list = [(val, self.image_slides[idx].timing) for idx, val in counts.items()]
+            results.append((v_slide.timing, sorted(list)))
 
-        for result in sorted(results):
-            print result
+        matches = {}
+        for timing, data in results:
+            matches[timing] = sorted(data)[-1][1]
+        return matches
 
 
     def _get_flann_index(self, images):

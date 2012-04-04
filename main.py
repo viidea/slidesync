@@ -107,8 +107,9 @@ class MainWindow(QtGui.QMainWindow):
         start = datetime.datetime.now()
 
         matcher = SlideMatcher(self.video_slides, self.image_slides)
-        matcher.match_slides()
-
+        matches = matcher.match_slides()
+        self._show_video_frames(self.video_slides)
+        self._show_match_frames(matches)
         end = datetime.datetime.now()
         self.status_ready()
 
@@ -150,6 +151,21 @@ class MainWindow(QtGui.QMainWindow):
 
         widget.setLayout(layout)
         self.video_scroll.setWidget(widget)
+        widget.show()
+
+    def _show_match_frames(self, match_frames):
+        widget = QtGui.QWidget()
+        widget.setMaximumHeight(self.video_scroll.height())
+        layout = QtGui.QHBoxLayout()
+        layout.setSpacing(25)
+
+        for v_time in sorted(match_frames.iterkeys()):
+            img = SlideButton(image_file=self.image_slides[match_frames[v_time]][1])
+            img.setMaximumHeight(self.video_scroll.height())
+            layout.addWidget(img)
+
+        widget.setLayout(layout)
+        self.matched_scroll.setWidget(widget)
         widget.show()
 
     def _build_window_content(self):
@@ -195,6 +211,8 @@ class MainWindow(QtGui.QMainWindow):
         self.video_scroll = QtGui.QScrollArea(self)
         self.video_scroll.setVerticalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
         self.video_scroll.setWidgetResizable(True)
+        self.video_scroll.horizontalScrollBar().valueChanged.connect(self._video_scrolled)
+
         main_box.addWidget(self.video_scroll)
         # Matched slides
         matched_label = QtGui.QLabel("Matched slides")
@@ -203,6 +221,7 @@ class MainWindow(QtGui.QMainWindow):
 
         self.matched_scroll = QtGui.QScrollArea(self)
         self.matched_scroll.setVerticalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
+        self.matched_scroll.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
         self.matched_scroll.setWidgetResizable(True)
         main_box.addWidget(self.matched_scroll)
 
@@ -224,6 +243,8 @@ class MainWindow(QtGui.QMainWindow):
         self.status_ready()
         self.show()
 
+    def _video_scrolled(self, position):
+        self.matched_scroll.horizontalScrollBar().setValue(position)
 
 def main():
     """
