@@ -9,24 +9,22 @@ class SlideButton(QtGui.QLabel):
 
         if image_file is not None:
             self.image = QtGui.QPixmap(image_file)
-            self.update()
 
-        size_policy = QtGui.QSizePolicy(QtGui.QSizePolicy.MinimumExpanding, QtGui.QSizePolicy.Expanding)
+        size_policy = QtGui.QSizePolicy(QtGui.QSizePolicy.MinimumExpanding, QtGui.QSizePolicy.MinimumExpanding)
         size_policy.setHeightForWidth(True)
         self.setSizePolicy(size_policy)
 
     def sizeHint(self):
-        return QtCore.QSize(50, self.heightForWidth(50))
+        return QtCore.QSize(250, self.heightForWidth(250))
 
     def resizeEvent(self, QResizeEvent):
         super(QtGui.QLabel, self).resizeEvent(QResizeEvent)
-        if QResizeEvent.oldSize() != QResizeEvent.size():
-            self.update()
+        self.update()
 
     def update(self):
         super(SlideButton, self).update()
         if self.image is not None:
-            self.setPixmap(self.image.scaledToWidth(self.width()))
+            self.setPixmap(self.image.scaledToWidth(self.width(), mode=QtCore.Qt.SmoothTransformation))
 
     def heightForWidth(self, width):
         if self.image is None:

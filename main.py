@@ -121,14 +121,17 @@ class MainWindow(QtGui.QMainWindow):
         self.status_label.update()
 
     def _show_image_slides(self):
-
         widget = QtGui.QWidget()
+        widget.setMaximumHeight(self.slide_scroll.height())
         layout = QtGui.QHBoxLayout()
+        layout.setSpacing(25)
 
         for image_slide in self.image_slides:
             num, path = image_slide
             img = SlideButton(image_file=path)
+            img.setMaximumHeight(self.slide_scroll.height())
             layout.addWidget(img)
+
         widget.setLayout(layout)
         self.slide_scroll.setWidget(widget)
         widget.show()
