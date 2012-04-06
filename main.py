@@ -69,7 +69,7 @@ class MainWindow(QtGui.QMainWindow):
             return
 
         self.image_slides = image_slides
-        self._show_image_slides()
+        self._show_slides(self.slide_scroll, self.image_slides)
         self.status_ready()
 
     def update_progress(self, value, frame=None):
@@ -88,7 +88,7 @@ class MainWindow(QtGui.QMainWindow):
         logger.debug("Slides: %s" % (self.video_slides,))
         end = datetime.datetime.now()
 
-        self._show_video_frames(self.video_slides)
+        self._show_slides(self.video_scroll, self.video_slides)
         self.status_ready()
 
         processing_time = end - start
@@ -108,8 +108,10 @@ class MainWindow(QtGui.QMainWindow):
 
         matcher = SlideMatcher(self.video_slides, self.image_slides)
         matches = matcher.match_slides()
-        self._show_video_frames(self.video_slides)
-        self._show_match_frames(matches)
+        self._show_slides(self.video_scroll, self.video_slides)
+
+        match_list = [(time, self.image_slides[matches[time]][1]) for time in sorted(matches.iterkeys())]
+        self._show_slides(self.matched_scroll, match_list)
         end = datetime.datetime.now()
         self.status_ready()
 
@@ -122,50 +124,18 @@ class MainWindow(QtGui.QMainWindow):
         self.progress_bar.setVisible(False)
         self.status_label.update()
 
-    def _show_image_slides(self):
+    def _show_slides(self, container, slides, click_cb=None):
         widget = QtGui.QWidget()
         widget.setMaximumHeight(self.slide_scroll.height())
         layout = QtGui.QHBoxLayout(widget)
         layout.setSpacing(25)
 
-        for image_slide in self.image_slides:
-            num, path = image_slide
-            img = SlideButton(image_file=path)
+        for id, img_path in slides:
+            img = SlideButton(image_file=img_path, time=id, selected_callback=click_cb, selectable=True)
             img.setMaximumHeight(self.slide_scroll.height())
             layout.addWidget(img)
-
         widget.setLayout(layout)
-        self.slide_scroll.setWidget(widget)
-        widget.show()
-
-    def _show_video_frames(self, video_frames):
-        widget = QtGui.QWidget()
-        widget.setMaximumHeight(self.video_scroll.height())
-        layout = QtGui.QHBoxLayout()
-        layout.setSpacing(25)
-
-        for time, video_frame in video_frames:
-            img = SlideButton(image_file=video_frame)
-            img.setMaximumHeight(self.video_scroll.height())
-            layout.addWidget(img)
-
-        widget.setLayout(layout)
-        self.video_scroll.setWidget(widget)
-        widget.show()
-
-    def _show_match_frames(self, match_frames):
-        widget = QtGui.QWidget()
-        widget.setMaximumHeight(self.video_scroll.height())
-        layout = QtGui.QHBoxLayout()
-        layout.setSpacing(25)
-
-        for v_time in sorted(match_frames.iterkeys()):
-            img = SlideButton(image_file=self.image_slides[match_frames[v_time]][1])
-            img.setMaximumHeight(self.video_scroll.height())
-            layout.addWidget(img)
-
-        widget.setLayout(layout)
-        self.matched_scroll.setWidget(widget)
+        container.setWidget(widget)
         widget.show()
 
     def _build_window_content(self):
