@@ -3,12 +3,21 @@ from PyQt4 import QtGui, QtCore
 class SlideButton(QtGui.QLabel):
     image = None
     selected = False
+    disabled = True
 
     def __init__(self, time=None, image_file=None, parent=None, selectable=False, selected_callback=None):
         super(SlideButton, self).__init__(parent)
         self.time = time
         self.selectable = selectable
         self.selected_callback = selected_callback
+
+        # Drawable caches
+        self.pen = QtGui.QPen(QtGui.QColor(255, 0, 0))
+        self.pen.setWidth(5)
+        self.font = QtGui.QFont()
+        self.font.setPixelSize(24)
+        self.font.setBold(True)
+        self.disabled_text = QtGui.QStaticText("X")
 
         if image_file is not None:
             self.image = QtGui.QPixmap(image_file)
@@ -37,12 +46,16 @@ class SlideButton(QtGui.QLabel):
         if self.image is not None:
             self.setPixmap(self.image.scaledToWidth(self.width(), mode=QtCore.Qt.SmoothTransformation))
 
-        if self.selected:
+        if self.disabled or self.selected:
             painter = QtGui.QPainter(self.pixmap())
-            pen = QtGui.QPen(QtGui.QColor(255, 0, 0))
-            pen.setWidth(5)
-            painter.setPen(pen)
-            painter.drawRect(2, 2, self.width() - 4, self.height() - 4)
+            painter.setPen(self.pen)
+            if self.disabled:
+                painter.setFont(self.font)
+                painter.drawStaticText(10, 10, self.disabled_text)
+            if self.selected:
+                painter.drawRect(2, 2, self.width() - 4, self.height() - 4)
+            painter.end()
+
 
     def heightForWidth(self, width):
         if self.image is None:
@@ -50,6 +63,14 @@ class SlideButton(QtGui.QLabel):
 
         height = int(float(self.image.height()) / float(self.image.width()) * width)
         return height
+
+    def disable(self):
+        self.disabled = True
+        self.update()
+
+    def enable(self):
+        self.disabled = False
+        self.update()
 
     def select(self):
         self.selected = True
