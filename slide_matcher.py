@@ -80,7 +80,6 @@ class SlideMatcher(object):
         mapping, flann_index = self._get_flann_index(self.image_slides)
 
         results = []
-        count = 0
         for v_time, v_slide in self.video_slides.items():
             # Use FLANN detector to find nearest neighbours
             neighbours = self._get_nearest_neighbours_flann(flann_index, v_slide.descriptors, -1)
@@ -90,10 +89,6 @@ class SlideMatcher(object):
                 counts[mapping[neighbour[1]]] += 1
             list = [(val, self.image_slides[idx].timing) for idx, val in counts.items()]
             results.append((v_slide.timing, sorted(list)))
-
-            if self.progress_cb is not None:
-                count += 1
-                self.progress_cb(count, max=len(self.video_slides.items()))
 
         matches = {}
         for timing, data in results:

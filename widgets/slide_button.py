@@ -3,7 +3,7 @@ from PyQt4 import QtGui, QtCore
 class SlideButton(QtGui.QLabel):
     image = None
     selected = False
-    disabled = True
+    disabled = False
 
     def __init__(self, time=None, image_file=None, parent=None, selectable=False, selected_callback=None):
         super(SlideButton, self).__init__(parent)
@@ -38,8 +38,8 @@ class SlideButton(QtGui.QLabel):
             self.selected = not self.selected
             self.update()
             
-            if self.selected and self.selected_callback is not None:
-                self.selected_callback(self.time)
+        if self.selected_callback is not None:
+            self.selected_callback(self)
 
     def update(self):
         super(SlideButton, self).update()
@@ -53,9 +53,8 @@ class SlideButton(QtGui.QLabel):
                 painter.setFont(self.font)
                 painter.drawStaticText(10, 10, self.disabled_text)
             if self.selected:
-                painter.drawRect(2, 2, self.width() - 4, self.height() - 4)
+                painter.drawRect(2, 2, self.width() - 4, self.heightForWidth(self.width()) - 4)
             painter.end()
-
 
     def heightForWidth(self, width):
         if self.image is None:
@@ -78,4 +77,8 @@ class SlideButton(QtGui.QLabel):
 
     def deselect(self):
         self.selected = False
+        self.update()
+
+    def setImage(self, image):
+        self.image = QtGui.QPixmap(image)
         self.update()
