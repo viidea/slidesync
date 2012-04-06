@@ -72,15 +72,18 @@ class MainWindow(QtGui.QMainWindow):
         self._show_slides(self.slide_scroll, self.image_slides)
         self.status_ready()
 
-    def update_progress(self, value, frame=None):
+    def update_progress(self, value, min = 0.0, max = 1.0):
+        if self.progress_bar.minimum() != min:
+            self.progress_bar.setMinimum(min)
+        if self.progress_bar.maximum() != max:
+            self.progress_bar.setMaximum(max)
+
         self.progress_bar.setValue(value)
         self.app.processEvents()
 
     def extract_slides(self):
         self.status_label.setText("Extracting slides...")
         self.progress_bar.setVisible(True)
-        self.progress_bar.setMaximum(self.video_file.get_info().duration)
-        self.progress_bar.setMinimum(0.0)
 
         start = datetime.datetime.now()
         extractor = SlideExtractor(self.video_file, cropbox=(220, 50, 820, 560), grayscale=False, callback=self.update_progress)
@@ -101,12 +104,11 @@ class MainWindow(QtGui.QMainWindow):
 
         self.status_label.setText("Matching slides...")
         self.progress_bar.setVisible(True)
-        self.progress_bar.setMinimum(0)
-        self.progress_bar.setMaximum(0)
+        self.progress_bar.setValue(0)
 
         start = datetime.datetime.now()
 
-        matcher = SlideMatcher(self.video_slides, self.image_slides)
+        matcher = SlideMatcher(self.video_slides, self.image_slides, progress_cb=self.update_progress)
         matches = matcher.match_slides()
         self._show_slides(self.video_scroll, self.video_slides)
 

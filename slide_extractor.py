@@ -80,7 +80,7 @@ class SlideExtractor(object):
                 # Save frame to disk
                 filepath = "/tmp/sync/%s (%s).png" % (timestamp, difference,)
                 cv.SaveImage(filepath, cv_frame)
-                self._send_callback(timestamp, current_frame=frame)
+                self._send_callback(timestamp)
 
                 slides.append((timestamp, filepath))
             else:
@@ -98,9 +98,9 @@ class SlideExtractor(object):
         except OSError as e:
             logger.error(e)
 
-    def _send_callback(self, timestamp, current_frame = None):
+    def _send_callback(self, timestamp):
         if self._callback is not None:
-            self._callback(timestamp, frame=current_frame)
+            self._callback(timestamp, max=self._video_file.get_info().duration)
 
     def _fix_contrast(self, image):
         minval, maxval, minloc, maxloc = cv.MinMaxLoc(image)
