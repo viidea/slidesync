@@ -1,9 +1,10 @@
 from PyQt4 import QtGui, QtCore
 
 class SlideButton(QtGui.QLabel):
-    image = None
+    image_path = None
     selected = False
     disabled = False
+    _image = None
 
     def __init__(self, time=None, image_file=None, parent=None, selectable=False, selected_callback=None):
         super(SlideButton, self).__init__(parent)
@@ -20,7 +21,8 @@ class SlideButton(QtGui.QLabel):
         self.disabled_text = QtGui.QStaticText("X")
 
         if image_file is not None:
-            self.image = QtGui.QPixmap(image_file)
+            self.image_path = image_file
+            self._image = QtGui.QPixmap(image_file)
 
         size_policy = QtGui.QSizePolicy(QtGui.QSizePolicy.MinimumExpanding, QtGui.QSizePolicy.MinimumExpanding)
         size_policy.setHeightForWidth(True)
@@ -43,8 +45,8 @@ class SlideButton(QtGui.QLabel):
 
     def update(self):
         super(SlideButton, self).update()
-        if self.image is not None:
-            self.setPixmap(self.image.scaledToWidth(self.width(), mode=QtCore.Qt.SmoothTransformation))
+        if self._image is not None:
+            self.setPixmap(self._image.scaledToWidth(self.width(), mode=QtCore.Qt.SmoothTransformation))
 
         if self.disabled or self.selected:
             painter = QtGui.QPainter(self.pixmap())
@@ -57,10 +59,10 @@ class SlideButton(QtGui.QLabel):
             painter.end()
 
     def heightForWidth(self, width):
-        if self.image is None:
+        if self._image is None:
             return width
 
-        height = int(float(self.image.height()) / float(self.image.width()) * width)
+        height = int(float(self._image.height()) / float(self._image.width()) * width)
         return height
 
     def disable(self):
@@ -80,5 +82,6 @@ class SlideButton(QtGui.QLabel):
         self.update()
 
     def setImage(self, image):
-        self.image = QtGui.QPixmap(image)
+        self.image_path = image
+        self._image = QtGui.QPixmap(image)
         self.update()

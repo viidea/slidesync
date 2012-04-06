@@ -14,7 +14,6 @@ logger = logging.getLogger(__name__)
 
 class MainWindow(QtGui.QMainWindow):
     video_file = None
-
     selected_slide = None
 
     # TODO: remove debug
@@ -29,7 +28,7 @@ class MainWindow(QtGui.QMainWindow):
         self.setMinimumHeight(300)
         self._build_window_content()
 
-    def click_load_video(self):
+    def load_video(self):
         filename = QtGui.QFileDialog().getOpenFileName(self, "Open video file", QDir.homePath())
         if filename == "":
             return      # User canceled the dialog
@@ -44,10 +43,10 @@ class MainWindow(QtGui.QMainWindow):
             msgBox.exec_()
             return
 
-        self.status_ready()
+        self._status_ready()
         self.video_label.setText(unicode(self.video_file.get_info()))
 
-    def _click_load_slides(self):
+    def load_slides(self):
         dirname = QtGui.QFileDialog().getExistingDirectory(self, "Open slide directory", QDir.homePath())
         if dirname == "":
             return
@@ -72,9 +71,9 @@ class MainWindow(QtGui.QMainWindow):
 
         self.image_slides = image_slides
         self._show_slides(self.slide_scroll, self.image_slides, click_cb=self._click_slide)
-        self.status_ready()
+        self._status_ready()
 
-    def update_progress(self, value, min = 0.0, max = 1.0):
+    def _update_progress(self, value, min = 0.0, max = 1.0):
         if self.progress_bar.minimum() != min:
             self.progress_bar.setMinimum(min)
         if self.progress_bar.maximum() != max:
@@ -88,13 +87,13 @@ class MainWindow(QtGui.QMainWindow):
         self.progress_bar.setVisible(True)
 
         start = datetime.datetime.now()
-        extractor = SlideExtractor(self.video_file, cropbox=(220, 50, 820, 560), grayscale=False, callback=self.update_progress)
+        extractor = SlideExtractor(self.video_file, cropbox=(220, 50, 820, 560), grayscale=False, callback=self._update_progress)
         self.video_slides = extractor.extract_slides()    # TODO: fix
         logger.debug("Slides: %s" % (self.video_slides,))
         end = datetime.datetime.now()
 
         self._show_slides(self.video_scroll, self.video_slides)
-        self.status_ready()
+        self._status_ready()
 
         processing_time = end - start
         msgBox = QMessageBox(QMessageBox.Information, "Woot", "Extracting took %s " % (processing_time,))
@@ -110,25 +109,35 @@ class MainWindow(QtGui.QMainWindow):
 
         start = datetime.datetime.now()
 
-        matcher = SlideMatcher(self.video_slides, self.image_slides, progress_cb=self.update_progress)
+        matcher = SlideMatcher(self.video_slides, self.image_slides, progress_cb=self._update_progress)
         matches = matcher.match_slides()
-        self._show_slides(self.video_scroll, self.video_slides, selectable=False)
-
         match_list = [(time, self.image_slides[matches[time]][1]) for time in sorted(matches.iterkeys())]
-        self._show_slides(self.matched_scroll, match_list, click_cb=self._click_matched_slide, selectable=False)
+        self.match_widgets = self._show_slides(self.matched_scroll, match_list, click_cb=self._click_matched_slide, selectable=False)
+
         end = datetime.datetime.now()
-        self.status_ready()
+        self._status_ready()
 
         processing_time = end - start
         msgBox = QMessageBox(QMessageBox.Information, "Woot", "Matching took %s " % (processing_time,))
         msgBox.exec_()
 
-    def status_ready(self):
+    def sync(self):
+        # Collect sync data first
+        matches = {}
+        for slide in self.match_widgets:
+            if not slide.disabled:
+                matches[slide.time] = slide.image_path
+
+        print matches
+
+    def _status_ready(self):
         self.status_label.setText("Ready.")
         self.progress_bar.setVisible(False)
         self.status_label.update()
 
     def _show_slides(self, container, slides, click_cb=None, selectable=True):
+        widgets = []
+
         widget = QtGui.QWidget()
         widget.setMaximumHeight(self.slide_scroll.height())
         layout = QtGui.QHBoxLayout(widget)
@@ -138,9 +147,12 @@ class MainWindow(QtGui.QMainWindow):
             img = SlideButton(image_file=img_path, time=id, selected_callback=click_cb, selectable=selectable)
             img.setMaximumHeight(self.slide_scroll.height())
             layout.addWidget(img)
+            widgets.append(img)
         widget.setLayout(layout)
         container.setWidget(widget)
         widget.show()
+
+        return widgets
 
     def _click_matched_slide(self, widget):
         if self.selected_slide is None:
@@ -150,7 +162,7 @@ class MainWindow(QtGui.QMainWindow):
                 widget.disable()
         else:
             widget.time = self.selected_slide.time
-            widget.setImage(self.selected_slide.image)
+            widget.setImage(self.selected_slide.image_path)
             self.selected_slide.deselect()
             self.selected_slide = None
 
@@ -169,11 +181,11 @@ class MainWindow(QtGui.QMainWindow):
         self.toolbar = self.addToolBar("Main")
 
         loadFileAction = QtGui.QAction("Load video...", self)
-        loadFileAction.triggered.connect(self.click_load_video)
+        loadFileAction.triggered.connect(self.load_video)
         self.toolbar.addAction(loadFileAction)
 
         loadSlidesAction = QtGui.QAction("Load slides...", self)
-        loadSlidesAction.triggered.connect(self._click_load_slides)
+        loadSlidesAction.triggered.connect(self.load_slides)
         self.toolbar.addAction(loadSlidesAction)
 
         extractAction = QtGui.QAction("Extract slides", self)
@@ -183,6 +195,10 @@ class MainWindow(QtGui.QMainWindow):
         matchAction = QtGui.QAction("Match slides", self)
         matchAction.triggered.connect(self.match_slides)
         self.toolbar.addAction(matchAction)
+
+        syncAction = QtGui.QAction("Sync", self)
+        syncAction.triggered.connect(self.sync)
+        self.toolbar.addAction(syncAction)
 
         # Prepare main content area
         central_widget = QtGui.QWidget()
@@ -236,7 +252,7 @@ class MainWindow(QtGui.QMainWindow):
         self.video_label.setMinimumWidth(150)
         self.video_label.setAlignment(Qt.AlignRight)
         self.statusBar().addWidget(self.video_label)
-        self.status_ready()
+        self._status_ready()
         self.show()
 
     def _video_scrolled(self, position):
