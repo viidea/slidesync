@@ -1,0 +1,3 @@
+[submodule "audiosync"]
+	path = audiosync
+	url = git@bitbucket.org:mavrik/audiosync.git
