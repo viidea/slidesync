@@ -72,7 +72,7 @@ class VideoFile(object):
         """
         This consumes one frame to determine FPS
         """
-        if self._current_frame_timestamp is None:
+        while self._current_frame_timestamp is None:
             self.get_frame()
 
         current_timestamp = self._current_frame_timestamp

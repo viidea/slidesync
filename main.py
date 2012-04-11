@@ -134,7 +134,7 @@ class MainWindow(QtGui.QMainWindow):
 
         print matches
 
-        sync_window = SyncWindow(None, parent=self)
+        sync_window = SyncWindow(self.video_file.filepath, matches, parent=self)
         sync_window.show()
 
     def _status_ready(self):

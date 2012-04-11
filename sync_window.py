@@ -1,15 +1,17 @@
-from PyQt4 import QtGui
 import os
+from PyQt4 import QtGui
 from PyQt4.QtCore import QDir
+from audiosync import utils, sync
 
 class SyncWindow(QtGui.QMainWindow):
 
     original_file = None
     camera_file = None
 
-    def __init__(self, camera_file, **kwargs):
+    def __init__(self, camera_file, slide_data, **kwargs):
         super(SyncWindow, self).__init__(**kwargs)
         self.camera_file = camera_file
+        self.slide_data = slide_data
 
         self.setWindowTitle("Synchronize with main track")
         self.setMinimumWidth(300)
@@ -61,10 +63,13 @@ class SyncWindow(QtGui.QMainWindow):
             self.btn_sync.setEnabled(True)
 
     def _sync(self):
-        pass
+        # Load audio files first
+        original_audio, original_sr = utils.get_audio_from_file(self.original_file)
+        slide_audio, slide_sr = utils.get_audio_from_file(self.camera_file)
 
-
-
+        # Preprocess audio files
+        original_audio, original_sr = sync.preprocess_audio(original_audio, original_sr)
+        slide_audio, slide_sr = sync.preprocess_audio(slide_audio, slide_sr)
 
 
 
