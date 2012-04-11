@@ -1,8 +1,11 @@
+import logging
 import os
 from PyQt4 import QtGui
 from PyQt4.QtCore import QDir
 from audiosync import utils, sync
 
+
+logger = logging.getLogger(__name__)
 class SyncWindow(QtGui.QMainWindow):
 
     original_file = None
@@ -40,10 +43,12 @@ class SyncWindow(QtGui.QMainWindow):
         main_grid.addWidget(btn_browse_original, 0, 2)
 
         btn_browse_camera = QtGui.QPushButton("Browse...")
+        btn_browse_camera.clicked.connect(self._browse_camera)
         main_grid.addWidget(btn_browse_camera, 1, 2)
 
         self.btn_sync = QtGui.QPushButton("Sync")
         self.btn_sync.setEnabled(False)
+        self.btn_sync.clicked.connect(self._sync)
         main_grid.addWidget(self.btn_sync, 2, 2)
 
     def _browse_original(self):
@@ -63,16 +68,23 @@ class SyncWindow(QtGui.QMainWindow):
             self.btn_sync.setEnabled(True)
 
     def _sync(self):
+        logger.debug("Loading files %s and %s" % (self.original_file, self.camera_file))
         # Load audio files first
         original_audio, original_sr = utils.get_audio_from_file(self.original_file)
         slide_audio, slide_sr = utils.get_audio_from_file(self.camera_file)
 
+        logger.debug("Preprocessing info...")
         # Preprocess audio files
         original_audio, original_sr = sync.preprocess_audio(original_audio, original_sr)
         slide_audio, slide_sr = sync.preprocess_audio(slide_audio, slide_sr)
 
+        logger.debug("Starting offset calculations...")
+        updated_slides = []
+        count = 0
+        for slide_time, slide_name in self.slide_data.items():
+            updated_time = sync.find_offset((original_audio, original_sr), (slide_audio, slide_sr), slide_time)
+            updated_slides.append((updated_time, slide_name))
+            count += 1
+            logger.debug("%s/%s" % (count, len(self.slide_data)))
 
-
-
-
-
+        print updated_slides
