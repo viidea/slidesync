@@ -2,9 +2,7 @@ import logging
 import os
 from PyQt4 import QtGui
 from PyQt4.QtCore import QDir
-import numpy
-from audiosync import utils, sync
-from slide_syncer import SlideSyncer
+from processing.slide_syncer import SlideSyncer
 
 
 logger = logging.getLogger(__name__)
@@ -72,4 +70,3 @@ class SyncWindow(QtGui.QMainWindow):
     def _sync(self):
         syncer = SlideSyncer(self.original_file, self.camera_file)
         slides = syncer.get_synced_timings(self.slide_data)
-        

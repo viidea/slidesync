@@ -1,11 +1,7 @@
 from collections import defaultdict
 import logging
-import cv
 import cv2
 import numpy
-from numpy.core.numeric import array
-from numpy.matlib import zeros
-import operator
 
 logger = logging.getLogger(__name__)
 
