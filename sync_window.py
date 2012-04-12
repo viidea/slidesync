@@ -3,7 +3,7 @@ import os
 from PyQt4 import QtGui
 from PyQt4.QtCore import QDir
 from processing.slide_syncer import SlideSyncer
-
+from processing.utils import package_slides
 
 logger = logging.getLogger(__name__)
 class SyncWindow(QtGui.QMainWindow):
@@ -70,3 +70,5 @@ class SyncWindow(QtGui.QMainWindow):
     def _sync(self):
         syncer = SlideSyncer(self.original_file, self.camera_file)
         slides = syncer.get_synced_timings(self.slide_data)
+        package_slides("/tmp/slides.zip", slides)
+        self.close()
