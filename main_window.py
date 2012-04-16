@@ -17,19 +17,19 @@ class MainWindow(QtGui.QMainWindow):
     match_widgets = []
 
     # TODO: remove debug
-    video_slides = [(2.0, '/tmp/sync/2.0 (1073741824).png'), (200.0, '/tmp/sync/200.0 (4.7381206446).png'), (206.0, '/tmp/sync/206.0 (133.417068815).png'), (222.0, '/tmp/sync/222.0 (5.90510307782).png'), (260.0, '/tmp/sync/260.0 (6.28900261324).png'), (362.0, '/tmp/sync/362.0 (7.35271341463).png'), (436.0, '/tmp/sync/436.0 (6.94161803136).png'), (618.0, '/tmp/sync/618.0 (9.36480037747).png'), (676.0, '/tmp/sync/676.0 (8.7093612079).png'), (798.0, '/tmp/sync/798.0 (8.23363530778).png'), (896.0, '/tmp/sync/896.0 (11.1702656794).png'), (898.0, '/tmp/sync/898.0 (35.2613632404).png')]
+    video_slides = [(2.0, '/tmp/sync/2.0 (1073741824).png'), (200.0, '/tmp/sync/200.0 (4.7381206446).png'), (206.0, '/tmp/sync/206.0 (133.417068815).png'), (222.0, '/tmp/sync/222.0 (5.90510307782).png'), (260.0, '/tmp/sync/260.0 (6.28900261324).png'), (362.0, '/tmp/sync/362.0 (7.35271341463).png'), (436.0, '/tmp/sync/436.0 (6.94161803136).png'), (618.0, '/tmp/sync/618.0 (9.36480037747).png'), (676.0, '/tmp/sync/676.0 (8.7093612079).png'), (798.0, '/tmp/sync/798.0 (8.23363530778).png'), (896.0, '/tmp/sync/896.0 (11.1702656794).png'), (898.0, '/tmp/sync/898.0 (35.2613632404).png'), (900.0, '/tmp/sync/900.0 (45.1867799071).png'), (902.0, '/tmp/sync/902.0 (29.9405255517).png'), (904.0, '/tmp/sync/904.0 (76.9001785714).png'), (906.0, '/tmp/sync/906.0 (17.940268583).png'), (908.0, '/tmp/sync/908.0 (148.350195993).png'), (910.0, '/tmp/sync/910.0 (81.15334277).png'), (940.0, '/tmp/sync/940.0 (73.753757259).png'), (942.0, '/tmp/sync/942.0 (14.8620920441).png'), (946.0, '/tmp/sync/946.0 (57.2611563589).png'), (948.0, '/tmp/sync/948.0 (190.888604094).png'), (950.0, '/tmp/sync/950.0 (26.6223744193).png'), (984.0, '/tmp/sync/984.0 (45.3339655923).png'), (1010.0, '/tmp/sync/1010.0 (38.7970107433).png'), (1034.0, '/tmp/sync/1034.0 (37.2762993612).png'), (1042.0, '/tmp/sync/1042.0 (5.39681837979).png'), (1046.0, '/tmp/sync/1046.0 (4.63113240418).png'), (1052.0, '/tmp/sync/1052.0 (4.98980691057).png'), (1058.0, '/tmp/sync/1058.0 (6.05390606852).png'), (1062.0, '/tmp/sync/1062.0 (5.52389227642).png'), (1076.0, '/tmp/sync/1076.0 (70.5215643148).png'), (1082.0, '/tmp/sync/1082.0 (41.5366819106).png'), (1086.0, '/tmp/sync/1086.0 (11.9621254355).png'), (1090.0, '/tmp/sync/1090.0 (9.45242450639).png'), (1092.0, '/tmp/sync/1092.0 (15.0839351045).png'), (1104.0, '/tmp/sync/1104.0 (20.1765585075).png'), (1122.0, '/tmp/sync/1122.0 (8.24537456446).png'), (1132.0, '/tmp/sync/1132.0 (56.4492203833).png'), (1134.0, '/tmp/sync/1134.0 (9.30322952962).png'), (1138.0, '/tmp/sync/1138.0 (8.34893800813).png'), (1140.0, '/tmp/sync/1140.0 (16.8280328107).png'), (1144.0, '/tmp/sync/1144.0 (57.9800500871).png'), (1152.0, '/tmp/sync/1152.0 (9.09116724739).png'), (1170.0, '/tmp/sync/1170.0 (28.5020339721).png'), (1172.0, '/tmp/sync/1172.0 (70.2634102787).png'), (1182.0, '/tmp/sync/1182.0 (141.098807346).png'), (1186.0, '/tmp/sync/1186.0 (76.9492973287).png'), (1192.0, '/tmp/sync/1192.0 (11.7791594077).png'), (1194.0, '/tmp/sync/1194.0 (6.40362587108).png'), (1196.0, '/tmp/sync/1196.0 (6.20081736353).png'), (1214.0, '/tmp/sync/1214.0 (79.6229188444).png'), (1222.0, '/tmp/sync/1222.0 (9.87044279907).png'), (1224.0, '/tmp/sync/1224.0 (29.2044410569).png'), (1226.0, '/tmp/sync/1226.0 (4.00559088269).png'), (1242.0, '/tmp/sync/1242.0 (4.54396849593).png'), (1260.0, '/tmp/sync/1260.0 (5.73917392567).png'), (1262.0, '/tmp/sync/1262.0 (6.62993321719).png'), (1276.0, '/tmp/sync/1276.0 (107.723228804).png'), (1292.0, '/tmp/sync/1292.0 (137.134844657).png'), (1310.0, '/tmp/sync/1310.0 (24.3197089141).png'), (1330.0, '/tmp/sync/1330.0 (15.7786636179).png'), (1332.0, '/tmp/sync/1332.0 (14.4140084204).png'), (1374.0, '/tmp/sync/1374.0 (140.465209785).png'), (1376.0, '/tmp/sync/1376.0 (13.5966332753).png'), (1380.0, '/tmp/sync/1380.0 (136.236588995).png'), (1414.0, '/tmp/sync/1414.0 (84.6471392276).png'), (1454.0, '/tmp/sync/1454.0 (37.5135460221).png'), (1462.0, '/tmp/sync/1462.0 (9.40198678862).png'), (1464.0, '/tmp/sync/1464.0 (6.71910060976).png'), (1468.0, '/tmp/sync/1468.0 (15.7115309233).png'), (1480.0, '/tmp/sync/1480.0 (29.9799745935).png'), (1482.0, '/tmp/sync/1482.0 (5.14528455285).png'), (1484.0, '/tmp/sync/1484.0 (7.62331083043).png'), (1490.0, '/tmp/sync/1490.0 (5.04878847271).png'), (1498.0, '/tmp/sync/1498.0 (8.54592987805).png'), (1526.0, '/tmp/sync/1526.0 (124.788774681).png'), (1606.0, '/tmp/sync/1606.0 (132.745868902).png'), (1630.0, '/tmp/sync/1630.0 (4.87637993612).png'), (1632.0, '/tmp/sync/1632.0 (5.01387993612).png'), (1648.0, '/tmp/sync/1648.0 (4.10456083043).png'), (1652.0, '/tmp/sync/1652.0 (6.88284262485).png'), (1662.0, '/tmp/sync/1662.0 (4.13255662021).png'), (1664.0, '/tmp/sync/1664.0 (4.92934088269).png'), (1700.0, '/tmp/sync/1700.0 (112.308745645).png'), (1720.0, '/tmp/sync/1720.0 (4.36554878049).png'), (1740.0, '/tmp/sync/1740.0 (123.023434233).png')]
 
     def __init__(self, app):
         super(MainWindow, self).__init__()
         self.app = app
         self.setGeometry(300, 300, 1280, 800)
-        self.setWindowTitle("VSync")
+        self.setWindowTitle("Viidea Slide Sync")
         self.setMinimumWidth(300)
         self.setMinimumHeight(300)
         self._build_window_content()
 
     def load_video(self):
-        filename = QtGui.QFileDialog().getOpenFileName(self, "Open video file", QDir.homePath())
+        filename = QtGui.QFileDialog().getOpenFileName(self, "Open video file", "/storage/djangomeet/")
         if filename == "":
             return      # User canceled the dialog
 
@@ -47,7 +47,7 @@ class MainWindow(QtGui.QMainWindow):
         self.video_label.setText(unicode(self.video_file.get_info()))
 
     def load_slides(self):
-        dirname = QtGui.QFileDialog().getExistingDirectory(self, "Open slide directory", QDir.homePath())
+        dirname = QtGui.QFileDialog().getExistingDirectory(self, "Open slide directory", "/storage/djangomeet/")
         if dirname == "":
             return
 
@@ -94,10 +94,7 @@ class MainWindow(QtGui.QMainWindow):
 
         self._show_slides(self.video_scroll, self.video_slides)
         self._status_ready()
-
         processing_time = end - start
-        msgBox = QMessageBox(QMessageBox.Information, "Woot", "Extracting took %s " % (processing_time,))
-        msgBox.exec_()
 
     def match_slides(self):
         if self.video_slides is None:
@@ -113,15 +110,11 @@ class MainWindow(QtGui.QMainWindow):
         matches = matcher.match_slides()
         match_list = [(time, self.image_slides[matches[time]][1]) for time in sorted(matches.iterkeys())]
         self.match_widgets = self._show_slides(self.matched_scroll, match_list, click_cb=self._click_matched_slide, selectable=False)
-
+        self._show_slides(self.video_scroll, self.video_slides)
         end = datetime.datetime.now()
         self._status_ready()
 
         processing_time = end - start
-        msgBox = QMessageBox(QMessageBox.Information, "Woot", "Matching took %s " % (processing_time,))
-        msgBox.exec_()
-
-        print match_list
 
     def sync(self):
         # Collect sync data first
@@ -132,7 +125,10 @@ class MainWindow(QtGui.QMainWindow):
 
         print matches
 
-        sync_window = SyncWindow(self.video_file.filepath, matches, parent=self)
+        if not self.video_file:
+            sync_window = SyncWindow(self.app, None, matches, parent=self)
+        else:
+            sync_window = SyncWindow(self.app, self.video_file.filepath, matches, parent=self)
         sync_window.show()
 
     def _status_ready(self):

@@ -54,10 +54,12 @@ class SlideMatcher(object):
         logger.info("Extracting features from image slides...")
         self._extract_features(self.image_slides)
         logger.info("Calculating distance matrix...")
+        if self.progress_cb is not None:
+            self.progress_cb(0, 0)
         return self._calculate_distance_matrix()
 
     def _extract_features(self, slides):
-        surf = cv2.SURF(_hessianThreshold=300)
+        surf = cv2.SURF(_hessianThreshold=150)
         #numpy.seterr(all="raise")
         for i in range(0, len(slides.values())):
             slide = slides.values()[i]
@@ -65,7 +67,8 @@ class SlideMatcher(object):
             image = cv2.imread(slide.image_path, cv2.CV_LOAD_IMAGE_GRAYSCALE)
             keypoints, descriptors = surf.detect(image, None, False)
             # Reshape descriptors so they'll make sense
-            descriptors.shape = (-1, surf.descriptorSize())
+            if not len(descriptors) == 0:
+                descriptors.shape = (-1, surf.descriptorSize())
             slide.keypoints = keypoints
             slide.descriptors = descriptors
 
@@ -93,13 +96,15 @@ class SlideMatcher(object):
 
 
     def _get_flann_index(self, images):
-        descriptors = tuple([image.descriptors for i_num, image in images.items()])
+        descriptors = tuple([image.descriptors for i_num, image in images.items() if len(image.descriptors) > 0])
         # Stack descriptors together
         stack = numpy.vstack(descriptors)
 
         mapping = {}
         idx = 0
         for i_num, image in images.items():
+            if len(image.descriptors) == 0:
+                continue
             for i in range(0, len(image.descriptors)):
                 mapping[idx] = i_num
                 idx += 1
