@@ -85,3 +85,6 @@ class SlideButton(QtGui.QLabel):
         self.image_path = image
         self._image = QtGui.QPixmap(image)
         self.update()
+
+    def __str__(self):
+        return "[%s]: %s" % (self.time, self.image_path)

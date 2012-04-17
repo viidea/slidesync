@@ -89,7 +89,7 @@ class SyncWindow(QtGui.QMainWindow):
         self.status_label.setText("Syncing slides to main video...")
         self.progress_bar.setVisible(True)
         syncer = SlideSyncer(self.original_file, self.camera_file)
-        slides = syncer.get_synced_timings(self.slide_data, progress_cb = self._progress_cb)
+        slides = syncer.get_synced_timings(self.slide_data)
         package_slides("/tmp/slides.zip", slides)
         self.close()
         self.status_label.setText("Ready.")
