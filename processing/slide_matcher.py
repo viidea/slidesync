@@ -2,6 +2,7 @@ from collections import defaultdict
 import logging
 import cv2
 import numpy
+import pyflann
 
 logger = logging.getLogger(__name__)
 
@@ -46,6 +47,7 @@ class SlideMatcher(object):
             time, path = image_slide
             self.image_slides[time] = Slide(time, path)
 
+        numpy.seterr(all="raise")
         self.progress_cb = progress_cb
 
     def match_slides(self):
@@ -69,6 +71,9 @@ class SlideMatcher(object):
             # Reshape descriptors so they'll make sense
             if not len(descriptors) == 0:
                 descriptors.shape = (-1, surf.descriptorSize())
+            else:
+                # Fake descriptors for empty images
+                descriptors = numpy.zeros((1, surf.descriptorSize()), dtype=numpy.float32)
             slide.keypoints = keypoints
             slide.descriptors = descriptors
 
@@ -96,25 +101,25 @@ class SlideMatcher(object):
 
 
     def _get_flann_index(self, images):
-        descriptors = tuple([image.descriptors for i_num, image in images.items() if len(image.descriptors) > 0])
+        descriptors = tuple([image.descriptors for i_num, image in images.items()])
         # Stack descriptors together
         stack = numpy.vstack(descriptors)
 
         mapping = {}
         idx = 0
         for i_num, image in images.items():
-            if len(image.descriptors) == 0:
-                continue
             for i in range(0, len(image.descriptors)):
                 mapping[idx] = i_num
                 idx += 1
 
-        flann = cv2.flann_Index(features=stack, params=dict(algorithm = 1, trees = 4))
-        return mapping, flann
+        flann = pyflann.FLANN()
+        index = flann.build_index(stack, algorithm="kmeans", branching=32, iterations=10)
+        return mapping, (flann, index)
 
     def _get_nearest_neighbours_flann(self, index, descriptors, treshold = 0.6):
         # Build index
-        indexes, distances = index.knnSearch(descriptors, 2, params={})    # Find 2 nearest neighbours
-        indexes1 = numpy.arange(len(descriptors))                          # Prepare indexes for zip
-        pairs = zip(indexes1, indexes[:, 0], distances[:, 0], distances[:,0] / (distances[:,1] + numpy.finfo(float).eps)) # Build pairs of indexes with first neighbour with distance
+        flann, index_params = index
+        indices, distances = flann.nn_index(descriptors, 2, checks=index_params["checks"]) # Find 2 nearest neighbours for each point
+        indices1 = numpy.arange(len(descriptors))                          # Prepare indexes for zip
+        pairs = zip(indices1, indices[:, 0], distances[:, 0], distances[:,0] / (distances[:,1] + numpy.finfo(float).eps)) # Build pairs of indexes with first neighbour with distance
         return filter(lambda item: item[3] > treshold, pairs)
