@@ -1,3 +1,4 @@
+import bisect
 import logging
 from audiosync import utils, sync, correlate
 
@@ -26,17 +27,28 @@ class SlideSyncer(object):
         else:
             updated_slides = self._get_synced_timings_local(slide_data, original_audio, slide_audio, slide_sr)
 
+        assert len(updated_slides) > 0
+
+        if updated_slides[0][0] > 0:
+            # Pull down first slide to 0 if all slides are positive
+            updated_slides[0] = (0, updated_slides[0][1])
+        else:
+            # Pull up incoming slide if there are negatively timed slides
+            zero_index = bisect.bisect_left([time for time,image in updated_slides], 0)
+            assert zero_index > 0
+            updated_slides[zero_index - 1] = (0, updated_slides[zero_index - 1][1])
+
         return updated_slides
 
     def _get_synced_timings_global(self, slide_data, original_audio, slide_audio, samplerate):
-        global_offset, corr = correlate.get_offset(slide_audio, original_audio, samplerate)
+        global_offset, corr = correlate.get_offset(original_audio, slide_audio, samplerate)
         print "Found offset %s" % global_offset
 
         updated_slides = []
         for slide_time, slide_name in slide_data.items():
-            slide_time = max(0, slide_time + global_offset)
+            slide_time = slide_time - global_offset
             updated_slides.append((slide_time, slide_name))
-        return updated_slides
+        return sorted(updated_slides)
 
     def _get_synced_timings_local(self, slide_data, original_audio, slide_audio, samplerate):
         raise NotImplementedError("Local timings are not implemented yet")

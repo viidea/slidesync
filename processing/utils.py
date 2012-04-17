@@ -7,10 +7,11 @@ def package_slides(output_file, slide_data):
 
     timings = {}
     for time, file in slide_data:
+        if time < 0: continue   # Skip negatively timed slides
         zip_file.write(file, arcname=unicode(os.path.basename(file)).encode("utf-8"))
         timings[time] = os.path.basename(file)
 
-    timings_json = json.dumps(sorted(timings))
+    timings_json = json.dumps(timings, sort_keys=True)
     print "JSON timings: ", timings_json
     zip_file.writestr("timings.json", timings_json)
     zip_file.close()
