@@ -4,6 +4,7 @@ import os
 from PyQt4.QtCore import QDir, Qt
 from PyQt4.QtGui import QMessageBox
 import datetime
+from crop_window import CropWindow
 from processing.slide_extractor import SlideExtractor
 from processing.slide_matcher import SlideMatcher
 from sync_window import SyncWindow
@@ -42,6 +43,10 @@ class MainWindow(QtGui.QMainWindow):
             msgBox.setDetailedText(unicode(e))
             msgBox.exec_()
             return
+
+        crop_window = CropWindow(self.video_file)
+        crop_window.exec_()
+        self.cropbox = crop_window.selected
 
         self._status_ready()
         self.video_label.setText(unicode(self.video_file.get_info()))
@@ -87,7 +92,7 @@ class MainWindow(QtGui.QMainWindow):
         self.progress_bar.setVisible(True)
 
         start = datetime.datetime.now()
-        extractor = SlideExtractor(self.video_file, cropbox=(220, 50, 820, 560), grayscale=False, callback=self._update_progress)
+        extractor = SlideExtractor(self.video_file, cropbox=self.cropbox, grayscale=False, callback=self._update_progress)
         self.video_slides = extractor.extract_slides()    # TODO: fix
         logger.debug("Slides: %s" % (self.video_slides,))
         end = datetime.datetime.now()
