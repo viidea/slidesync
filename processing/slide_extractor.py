@@ -6,7 +6,7 @@ logger = logging.getLogger(__name__)
 
 class SlideExtractor(object):
     SKIP_COUNT = 50
-    TRESHOLD = 4
+    TRESHOLD = 10
 
     def __init__(self, video_file, cropbox=None, callback=None, grayscale=False):
         self._video_file = video_file
@@ -49,7 +49,7 @@ class SlideExtractor(object):
             region = frame.get_region(x, y, width, height).get_image_data()
             cv_frame = cv.CreateImage((width, height), cv.IPL_DEPTH_8U, 3)      # Allocate image
             cv.SetData(cv_frame, region.get_data("RGB", width * 3), width * 3)  # Set data from frame
-
+            cv.Smooth(cv_frame, cv_frame, smoothtype=cv.CV_GAUSSIAN, param1=7)
             if self._channels == 1:     # Grayscale
                 gray_frame = cv.CreateImage(cv.GetSize(cv_frame), cv.IPL_DEPTH_8U, 1)
                 cv.CvtColor(cv_frame, gray_frame, cv.CV_RGB2GRAY)
@@ -65,8 +65,6 @@ class SlideExtractor(object):
                 self._fix_contrast(g)
                 self._fix_contrast(b)
                 cv.Merge(b, g, r, None, cv_frame)
-
-            cv.Smooth(cv_frame, cv_frame, smoothtype=cv.CV_GAUSSIAN)
 
             if current_frame is None:
                 difference = 2**30      # Make sure to grab first frame

@@ -51,7 +51,7 @@ class VideoFile(object):
 
         self._determine_fps()
         self.info = VideoInfo(self.source.video_format.width,
-                              self.source.video_format.width,
+                              self.source.video_format.height,
                               self._fps,
                               self.source.audio_format.channels,
                               self.source.audio_format.sample_rate,
