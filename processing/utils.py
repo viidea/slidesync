@@ -13,5 +13,5 @@ def package_slides(output_file, slide_data):
 
     timings_json = json.dumps(timings, sort_keys=True)
     print "JSON timings: ", timings_json
-    zip_file.writestr("timings.json", timings_json)
+    zip_file.writestr("timings.txt", timings_json)
     zip_file.close()
