@@ -57,9 +57,16 @@ class VideoFile(object):
                               self.source.audio_format.sample_rate,
                               self.source.duration)
 
+    def seek_to(self, timestamp):
+        self.source.seek(timestamp)
+
     def get_frame(self):
-        if self._current_frame_timestamp is None or self._current_frame is None:
-            return self.get_next_frame()
+        # Try to get next un-broken frame
+        while self._current_frame is None:
+            if self._current_frame_timestamp is None:
+                break
+            self.get_next_frame()
+
         return self._current_frame_timestamp, self._current_frame
 
     def get_next_frame(self):
@@ -72,8 +79,8 @@ class VideoFile(object):
         """
         This consumes one frame to determine FPS
         """
-        while self._current_frame_timestamp is None:
-            self.get_frame()
+        while self._current_frame_timestamp is None and self._current_frame is None:
+            self.get_next_frame()
 
         current_timestamp = self._current_frame_timestamp
         diff = self.source.get_next_video_timestamp() - current_timestamp
