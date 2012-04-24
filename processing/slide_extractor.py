@@ -6,12 +6,13 @@ logger = logging.getLogger(__name__)
 
 class SlideExtractor(object):
     SKIP_COUNT = 50
-    TRESHOLD = 10
+    _treshold = 10
 
-    def __init__(self, video_file, cropbox=None, callback=None, grayscale=False):
+    def __init__(self, video_file, cropbox=None, callback=None, grayscale=False, treshold=10):
         self._video_file = video_file
         self._callback = callback
         self._cropbox = cropbox
+        self._treshold = treshold
 
         if grayscale:
             self._channels = 1
@@ -74,7 +75,7 @@ class SlideExtractor(object):
                 cv.AbsDiff(current_frame, cv_frame, diff)
                 difference = sum(cv.Sum(diff)) / pixel_count        # Normalize difference with pixel count
 
-            if difference > self.TRESHOLD:
+            if difference > self._treshold:
                 # Save frame to disk
                 filepath = "/tmp/sync/%s (%s).png" % (timestamp, difference,)
                 cv.SaveImage(filepath, cv_frame)
