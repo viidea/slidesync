@@ -21,6 +21,7 @@ class SlideExtractor(object):
 
     def extract_slides(self):
         self._create_temp_dir()
+        self._video_file.seek_to(1.0)
 
         if self._cropbox is not None:
             x, y, width, height = self._cropbox

@@ -1,15 +1,15 @@
 from PyQt4 import QtGui, uic
-from PyQt4.QtGui import QLabel
 from processing.slide_extractor import SlideExtractor
 
 form_class, _ = uic.loadUiType("ui/extract_dialog.ui")
 class ExtractWindow(form_class, QtGui.QDialog):
     _treshold = 10
 
-    def __init__(self, parent, video, crop_box):
+    def __init__(self, parent, video, crop_box, app = None):
         super(QtGui.QDialog, self).__init__(parent)
         self._video = video
         self._crop_box = crop_box
+        self._app = app
         self.setupUi(self)
         self.prgProgress.setVisible(False)
         self.btnExtract.pressed.connect(self._extract)
@@ -34,7 +34,9 @@ class ExtractWindow(form_class, QtGui.QDialog):
             self.prgProgress.setMaximum(max)
 
         self.prgProgress.setValue(value)
-        self.app.processEvents()
+
+        if self._app is not None:
+            self._app.processEvents()
 
     def _update_treshold_label(self):
         self._treshold = self.sldTreshold.value()

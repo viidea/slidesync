@@ -12,8 +12,9 @@ class MainWindow(form_class, base_class):
     _slides = None              # Path to slides
     _video_slides = None        # Slides extracted from video
 
-    def __init__(self, owner):
+    def __init__(self, app):
         super(base_class, self).__init__()
+        self._app = app
         self.setupUi(self)
         self.btnStart.pressed.connect(self._process())
 
@@ -57,7 +58,7 @@ class MainWindow(form_class, base_class):
 
     def _extract_frames(self):
         self._label_set_bold(self.lblExtractFrames, True)
-        extract_window = ExtractWindow(self, self._video, self._slide_crop_box)
+        extract_window = ExtractWindow(self, self._video, self._slide_crop_box, app=self._app)
         extract_window.exec_()
         self._video_slides = extract_window.video_slides
         self._label_set_bold(self.lblExtractFrames, False)
