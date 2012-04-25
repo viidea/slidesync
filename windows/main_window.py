@@ -4,6 +4,7 @@ from PyQt4.QtGui import QMessageBox
 from windows.extract_window import ExtractWindow
 from windows.load_video_window import LoadVideoWindow
 from windows.match_window import MatchWindow
+from windows.review_window import ReviewWindow
 
 form_class, base_class = uic.loadUiType("ui/main_window.ui")
 class MainWindow(form_class, base_class):
@@ -68,9 +69,16 @@ class MainWindow(form_class, base_class):
     def _match_slides(self):
         self._label_set_bold(self.lblMatch, True)
         match_window = MatchWindow(self, self._app, self._slides, self._video_slides)
-        match_window.exec_()
+        match_window.show()
+        match_window.process()
         self._matches = match_window.matches
         self._label_set_bold(self.lblMatch, False)
+
+    def _review_matches(self):
+        self._label_set_bold(self.lblReview, True)
+        review_window = ReviewWindow(self, self._slides, self._video_slides, self._matches)
+        review_window.exec_()
+        self._label_set_bold(self.lblReview, False)
 
     def _label_set_bold(self, label, bold=True):
         font = label.font()

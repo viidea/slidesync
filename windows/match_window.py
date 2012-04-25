@@ -12,7 +12,7 @@ class MatchWindow(form_class, QtGui.QDialog):
         self._app = app
         self.setupUi(self)
 
-    def _process(self):
+    def process(self):
         matcher = SlideMatcher(self._video_slides,
                                self._slides,
                                progress_cb=self._update_progress)
@@ -27,7 +27,3 @@ class MatchWindow(form_class, QtGui.QDialog):
 
         self.prgProgress.setValue(value)
         self._app.processEvents()
-
-    def showEvent(self, QShowEvent):
-        super(QtGui.QDialog, self).showEvent(QShowEvent)
-        self._process()

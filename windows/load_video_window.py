@@ -26,7 +26,7 @@ class LoadVideoWindow(QtGui.QDialog):
         if self.video_view.selected_box is not None:
             self.selected = self.video_view.selected_box
         else:
-            self.selected = (0, 0, self.video.get_frame().width, self.video.get_frame().height)
+            self.selected = (0, 0, self.video.get_frame()[1].width, self.video.get_frame()[1].height)
         self.close()
 
     def showEvent(self, QShowEvent):
