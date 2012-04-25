@@ -26,6 +26,7 @@ class MainWindow(form_class, base_class):
         self._load_slides()
         self._extract_frames()
         self._match_slides()
+        self._review_matches()
 
     def _load_slide_video(self):
         self._label_set_bold(self.lblLoadSlideVideo, True)
@@ -77,7 +78,7 @@ class MainWindow(form_class, base_class):
     def _review_matches(self):
         self._label_set_bold(self.lblReview, True)
         review_window = ReviewWindow(self, self._slides, self._video_slides, self._matches)
-        review_window.exec_()
+        review_window.show()
         self._label_set_bold(self.lblReview, False)
 
     def _label_set_bold(self, label, bold=True):

@@ -29,7 +29,7 @@ class SlideButton(QtGui.QLabel):
         self.setSizePolicy(size_policy)
 
     def sizeHint(self):
-        return QtCore.QSize(250, self.heightForWidth(250))
+        return QtCore.QSize(200, self.heightForWidth(200))
 
     def resizeEvent(self, QResizeEvent):
         super(QtGui.QLabel, self).resizeEvent(QResizeEvent)
