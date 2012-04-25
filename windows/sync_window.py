@@ -21,7 +21,7 @@ class SyncWindow(QtGui.QDialog, form_class):
         if self._original_video == "":
             return
 
-        slide_syncer = SlideSyncer(self._original_video, self._camera_video)
+        slide_syncer = SlideSyncer(unicode(self._original_video), self._camera_video)
         self.timings = slide_syncer.get_synced_timings(self._slide_data)
         self.close()
 

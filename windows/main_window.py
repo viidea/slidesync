@@ -1,6 +1,7 @@
 from PyQt4 import QtGui, uic, QtCore
 import os
 from PyQt4.QtGui import QMessageBox
+from processing.utils import package_slides
 from windows.extract_window import ExtractWindow
 from windows.load_video_window import LoadVideoWindow
 from windows.match_window import MatchWindow
@@ -14,6 +15,7 @@ class MainWindow(form_class, base_class):
     _slide_crop_box = None      # Crop box for slide video
     _slides = None              # Path to slides
     _video_slides = None        # Slides extracted from video
+    _timings = None             # Fixed timings for video
 
     def __init__(self, app):
         super(base_class, self).__init__()
@@ -29,6 +31,8 @@ class MainWindow(form_class, base_class):
         self._match_slides()
         self._review_matches()
         self._sync_with_original()
+        self._package_slides()
+        self.btnStart.setEnabled(True)
 
     def _load_slide_video(self):
         self._label_set_bold(self.lblLoadSlideVideo, True)
@@ -91,7 +95,17 @@ class MainWindow(form_class, base_class):
         sync_window = SyncWindow(self, self._app, self._video.filepath, self._matches)
         sync_window.show()
         sync_window.process()
+        self._synced_slides = sync_window.timings
         self._label_set_bold(self.lblSync, False)
+
+    def _package_slides(self):
+        self._label_set_bold(self.lblSave, True)
+        filename = None
+        while filename is None:
+            filename = QtGui.QFileDialog().getSaveFileName(self, "Save file...", QtCore.QDir().homePath(), "Zip files (*.zip)")
+
+        package_slides(unicode(filename), self._synced_slides)
+        self._label_set_bold(self.lblSave, False)
 
     def _label_set_bold(self, label, bold=True):
         font = label.font()
