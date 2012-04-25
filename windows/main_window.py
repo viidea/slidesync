@@ -3,6 +3,7 @@ import os
 from PyQt4.QtGui import QMessageBox
 from windows.extract_window import ExtractWindow
 from windows.load_video_window import LoadVideoWindow
+from windows.match_window import MatchWindow
 
 form_class, base_class = uic.loadUiType("ui/main_window.ui")
 class MainWindow(form_class, base_class):
@@ -16,13 +17,14 @@ class MainWindow(form_class, base_class):
         super(base_class, self).__init__()
         self._app = app
         self.setupUi(self)
-        self.btnStart.pressed.connect(self._process())
+        self.btnStart.clicked.connect(self._process)
 
     def _process(self):
         self.btnStart.setEnabled(False)
         self._load_slide_video()
         self._load_slides()
         self._extract_frames()
+        self._match_slides()
 
     def _load_slide_video(self):
         self._label_set_bold(self.lblLoadSlideVideo, True)
@@ -62,6 +64,13 @@ class MainWindow(form_class, base_class):
         extract_window.exec_()
         self._video_slides = extract_window.video_slides
         self._label_set_bold(self.lblExtractFrames, False)
+
+    def _match_slides(self):
+        self._label_set_bold(self.lblMatch, True)
+        match_window = MatchWindow(self, self._app, self._slides, self._video_slides)
+        match_window.exec_()
+        self._matches = match_window.matches
+        self._label_set_bold(self.lblMatch, False)
 
     def _label_set_bold(self, label, bold=True):
         font = label.font()
