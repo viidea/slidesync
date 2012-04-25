@@ -4,15 +4,19 @@ from widgets.slide_button import SlideButton
 form_class, _ = uic.loadUiType("ui/review_window.ui")
 class ReviewWindow(QtGui.QMainWindow, form_class):
     _selected_slide = None
+    done = False    # Used to signal back end of use
 
 
     def __init__(self, owner, slides, video_slides, matches):
         super(QtGui.QMainWindow, self).__init__(owner)
+
+
         self._slides = slides
         self._video_slides = video_slides
         self._matches = matches
         self.setupUi(self)
         self.scrVideoFrames.horizontalScrollBar().valueChanged.connect(self._video_scrolled)
+        self.btnDone.clicked.connect(self._done)
 
         self._slide_widgets = self._show_slides(self.scrSlides, self._slides, horizontal=False, click_cb=self._slide_clicked)
         self._video_widgets = self._show_slides(self.scrVideoFrames, self._video_slides, selectable=False)
@@ -67,3 +71,17 @@ class ReviewWindow(QtGui.QMainWindow, form_class):
     def _video_scrolled(self, position):
         self.scrMatches.horizontalScrollBar().setValue(position)
 
+    def closeEvent(self, QCloseEvent):
+        matches = {}
+
+        for i in range(0, len(self._match_widgets)):
+            match_slide = self._match_widgets[i]
+            if not match_slide.disabled:
+                time = self._video_slides[i][0]
+                matches[time] = match_slide.image_path
+
+        self.matches = matches
+        self.done = True
+
+    def _done(self):
+        self.close()

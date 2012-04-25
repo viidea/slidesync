@@ -1,7 +1,7 @@
 from PyQt4 import uic, QtGui
 from processing.slide_matcher import SlideMatcher
 
-form_class, _ = uic.loadUiType("ui/match_window.ui")
+form_class, _ = uic.loadUiType("ui/progress_window.ui")
 class MatchWindow(form_class, QtGui.QDialog):
 
     def __init__(self, owner, app, slides, video_frames):

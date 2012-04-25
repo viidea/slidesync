@@ -5,6 +5,7 @@ from windows.extract_window import ExtractWindow
 from windows.load_video_window import LoadVideoWindow
 from windows.match_window import MatchWindow
 from windows.review_window import ReviewWindow
+from windows.sync_window import SyncWindow
 
 form_class, base_class = uic.loadUiType("ui/main_window.ui")
 class MainWindow(form_class, base_class):
@@ -27,6 +28,7 @@ class MainWindow(form_class, base_class):
         self._extract_frames()
         self._match_slides()
         self._review_matches()
+        self._sync_with_original()
 
     def _load_slide_video(self):
         self._label_set_bold(self.lblLoadSlideVideo, True)
@@ -79,7 +81,17 @@ class MainWindow(form_class, base_class):
         self._label_set_bold(self.lblReview, True)
         review_window = ReviewWindow(self, self._slides, self._video_slides, self._matches)
         review_window.show()
+        while not review_window.done:
+            self._app.processEvents()
+        self._matches = review_window.matches
         self._label_set_bold(self.lblReview, False)
+
+    def _sync_with_original(self):
+        self._label_set_bold(self.lblSync, True)
+        sync_window = SyncWindow(self, self._app, self._video.filepath, self._matches)
+        sync_window.show()
+        sync_window.process()
+        self._label_set_bold(self.lblSync, False)
 
     def _label_set_bold(self, label, bold=True):
         font = label.font()
