@@ -1,8 +1,8 @@
 from PyQt4 import QtGui, uic, QtCore
 import os
 from PyQt4.QtGui import QMessageBox
-from extract_window import ExtractWindow
-from load_video_window import LoadVideoWindow
+from windows.extract_window import ExtractWindow
+from windows.load_video_window import LoadVideoWindow
 
 form_class, base_class = uic.loadUiType("ui/main_window.ui")
 class MainWindow(form_class, base_class):
