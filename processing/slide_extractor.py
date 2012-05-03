@@ -48,7 +48,7 @@ class SlideExtractor(object):
 
             assert frame.format == "RGB"
             # Crop frame if possible
-            region = frame.get_region(x, y, width, height).get_image_data()
+            region = frame.get_region(x, y, width, height)
             cv_frame = cv.CreateImage((width, height), cv.IPL_DEPTH_8U, 3)      # Allocate image
             cv.SetData(cv_frame, region.get_data("RGB", width * 3), width * 3)  # Set data from frame
             cv.Smooth(cv_frame, cv_frame, smoothtype=cv.CV_GAUSSIAN, param1=7)
