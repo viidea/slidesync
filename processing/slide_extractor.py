@@ -1,6 +1,7 @@
 from cv2 import cv
 import logging
 import os
+import tempfile
 
 logger = logging.getLogger(__name__)
 
@@ -20,7 +21,7 @@ class SlideExtractor(object):
             self._channels = 3
 
     def extract_slides(self):
-        self._create_temp_dir()
+        self.tmp_dir = self._create_temp_dir()
         self._video_file.seek_to(1.0)
 
         if self._cropbox is not None:
@@ -78,7 +79,7 @@ class SlideExtractor(object):
 
             if difference > self._treshold:
                 # Save frame to disk
-                filepath = "/tmp/sync/%s (%s).png" % (timestamp, difference,)
+                filepath = os.path.join(tmp_dir, "%s (%s).png" % (timestamp, difference,))
                 cv.SaveImage(filepath, cv_frame)
                 self._send_callback(timestamp)
 
@@ -92,7 +93,7 @@ class SlideExtractor(object):
 
     def _create_temp_dir(self):
         try:
-            os.mkdir("/tmp/sync/")
+            return tempfile.mkdtemp(prefix="sync-")
         except IOError:
             logger.warning("Failed to create temporary directory for slide extraction!")
         except OSError as e:
