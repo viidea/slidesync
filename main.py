@@ -1,4 +1,5 @@
 import logging
+import multiprocessing
 import sys
 from PyQt4 import QtGui
 from windows.main_window import MainWindow
@@ -17,4 +18,5 @@ def main():
     sys.exit(app.exec_())
 
 if __name__ == "__main__":
+    multiprocessing.freeze_support()
     main()

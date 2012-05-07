@@ -1,8 +1,8 @@
-from PyQt4 import QtGui, uic
+from PyQt4 import QtGui
+from ui import review_window
 from widgets.slide_button import SlideButton
 
-form_class, _ = uic.loadUiType("ui/review_window.ui")
-class ReviewWindow(QtGui.QMainWindow, form_class):
+class ReviewWindow(QtGui.QMainWindow, review_window.Ui_mwReview):
     _selected_slide = None
     done = False    # Used to signal back end of use
 

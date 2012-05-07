@@ -1,8 +1,8 @@
-from PyQt4 import QtGui, uic
+from PyQt4 import QtGui
 from processing.slide_extractor import SlideExtractor
+from ui import extract_dialog
 
-form_class, _ = uic.loadUiType("ui/extract_dialog.ui")
-class ExtractWindow(form_class, QtGui.QDialog):
+class ExtractWindow(extract_dialog.Ui_dlgExtract, QtGui.QDialog):
     _treshold = 10
 
     def __init__(self, parent, video, crop_box, app = None):

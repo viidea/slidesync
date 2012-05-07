@@ -1,11 +1,8 @@
-import os
-from PyQt4 import QtGui, uic, QtCore
-from PyQt4.QtCore import Qt
+from PyQt4 import QtGui, QtCore
 from processing.slide_syncer import SlideSyncer
-from processing.utils import package_slides
+from ui import progress_window
 
-form_class, _ = uic.loadUiType("ui/progress_window.ui")
-class SyncWindow(QtGui.QDialog, form_class):
+class SyncWindow(QtGui.QDialog, progress_window.Ui_Dialog):
 
     def __init__(self, owner, app, camera_file, slide_data):
         super(QtGui.QDialog, self).__init__(owner)

@@ -1,15 +1,15 @@
-from PyQt4 import QtGui, uic, QtCore
+from PyQt4 import QtGui, QtCore
 import os
 from PyQt4.QtGui import QMessageBox
 from processing.utils import package_slides
+from ui import main_window
 from windows.extract_window import ExtractWindow
 from windows.load_video_window import LoadVideoWindow
 from windows.match_window import MatchWindow
 from windows.review_window import ReviewWindow
 from windows.sync_window import SyncWindow
 
-form_class, base_class = uic.loadUiType("ui/main_window.ui")
-class MainWindow(form_class, base_class):
+class MainWindow(main_window.Ui_MainWindow, QtGui.QMainWindow):
     # State data
     _video = None
     _slide_crop_box = None      # Crop box for slide video
@@ -18,7 +18,7 @@ class MainWindow(form_class, base_class):
     _timings = None             # Fixed timings for video
 
     def __init__(self, app):
-        super(base_class, self).__init__()
+        super(QtGui.QMainWindow, self).__init__()
         self._app = app
         self.setupUi(self)
         self.btnStart.clicked.connect(self._process)
