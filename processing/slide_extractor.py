@@ -79,7 +79,7 @@ class SlideExtractor(object):
 
             if difference > self._treshold:
                 # Save frame to disk
-                filepath = os.path.join(tmp_dir, "%s (%s).png" % (timestamp, difference,))
+                filepath = os.path.join(self.tmp_dir, "%s (%s).png" % (timestamp, difference,))
                 cv.SaveImage(filepath, cv_frame)
                 self._send_callback(timestamp)
 
