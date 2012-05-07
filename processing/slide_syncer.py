@@ -42,7 +42,7 @@ class SlideSyncer(object):
 
     def _get_synced_timings_global(self, slide_data, original_audio, slide_audio, samplerate):
         global_offset, corr = correlate.get_offset(original_audio, slide_audio, samplerate)
-        print "Found offset %s" % global_offset
+        logger.info("Found offset %s", global_offset)
 
         updated_slides = []
         for slide_time, slide_name in slide_data.items():

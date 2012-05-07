@@ -31,8 +31,6 @@ class VideoView(QLabel):
             self._selection_box = (sx, sy, QMouseEvent.x(), QMouseEvent.y())
             self.update()
 
-            print self._selection_box
-
     def mouseReleaseEvent(self, QMouseEvent):
         if self._selection_in_progress:
             sx, sy, ex, ey = self._selection_box

@@ -1,7 +1,9 @@
 import json
+import logging
 import os
 import zipfile
 
+logger = logging.getLogger(__name__)
 def package_slides(output_file, slide_data):
     zip_file = zipfile.ZipFile(output_file, mode="w", compression=zipfile.ZIP_DEFLATED)
 
@@ -12,6 +14,6 @@ def package_slides(output_file, slide_data):
         timings[time] = os.path.basename(file)
 
     timings_json = json.dumps(timings, sort_keys=True)
-    print "JSON timings: ", timings_json
+    logger.info("JSON timings: %s", timings_json)
     zip_file.writestr("timings.txt", timings_json)
     zip_file.close()
