@@ -1,23 +1,35 @@
 from PyQt4 import QtGui, QtCore
 
-class SlideButton(QtGui.QLabel):
+class SlideButton(QtGui.QLabel, object):
     image_path = None
     selected = False
     disabled = False
     _image = None
+    _num_text = None
 
-    def __init__(self, time=None, image_file=None, parent=None, selectable=False, selected_callback=None):
+    def __init__(self, time=None, image_file=None, parent=None, selectable=False, selected_callback=None, num=None):
         super(SlideButton, self).__init__(parent)
         self.time = time
+        self._num = num
         self.selectable = selectable
         self.selected_callback = selected_callback
 
         # Drawable caches
+        self.font = QtGui.QFont()
+        self.font.setPixelSize(20)
+        self.font.setBold(True)
+
         self.pen = QtGui.QPen(QtGui.QColor(255, 0, 0))
         self.pen.setWidth(5)
+        self.box_pen = QtGui.QPen(QtGui.QColor(0, 0, 0))
+        self.box_pen.setWidth(2)
+
         self.disabled_pen = QtGui.QPen(QtGui.QColor(255, 255, 255, 200))
         self.disabled_pen.setWidth(1)
-        self.brush = QtGui.QBrush(QtGui.QColor(255, 255, 255, 200))
+        self.white_brush = QtGui.QBrush(QtGui.QColor(255, 255, 255, 200))
+
+        if num is not None:
+            self._num_text = QtGui.QStaticText(str(num))
 
         if image_file is not None:
             self.image_path = image_file
@@ -47,16 +59,31 @@ class SlideButton(QtGui.QLabel):
         if self._image is not None:
             self.setPixmap(self._image.scaledToWidth(self.width(), mode=QtCore.Qt.SmoothTransformation))
 
+        painter = None
         if self.disabled or self.selected:
             painter = QtGui.QPainter(self.pixmap())
+
             painter.setPen(self.pen)
-            painter.setBrush(self.brush)
             if self.disabled:
+                painter.setBrush(self.white_brush)
                 painter.setPen(self.disabled_pen)
                 painter.drawRect(0, 0, self.width(), self.heightForWidth(self.width()))
             if self.selected:
                 painter.drawRect(2, 2, self.width() - 4, self.heightForWidth(self.width()) - 4)
-            painter.end()
+
+        if self._num is not None:
+            if painter is None:
+                painter = QtGui.QPainter(self.pixmap())
+
+            painter.setBrush(self.white_brush)
+            painter.setPen(self.box_pen)
+            painter.drawRect(8, 8, 4 + self._num_text.size().width(), 4 + self._num_text.size().height())
+            painter.setFont(self.font)
+
+            if not self.disabled:
+                painter.setPen(self.pen)
+            painter.drawStaticText(10, 10, self._num_text)
+
 
     def heightForWidth(self, width):
         if self._image is None:
@@ -85,6 +112,15 @@ class SlideButton(QtGui.QLabel):
         self.image_path = image
         self._image = QtGui.QPixmap(image)
         self.update()
+
+    def _get_num(self):
+        return self._num
+
+    def _set_num(self, num):
+        self._num = num
+        self._num_text = QtGui.QStaticText(str(num))
+
+    num = property(_get_num, _set_num)
 
     def __str__(self):
         return "[%s]: %s" % (self.time, self.image_path)

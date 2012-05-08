@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>800</width>
-    <height>600</height>
+    <width>1200</width>
+    <height>860</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -43,7 +43,7 @@
         </property>
         <property name="minimumSize">
          <size>
-          <width>200</width>
+          <width>300</width>
           <height>0</height>
          </size>
         </property>
@@ -64,8 +64,8 @@
           <rect>
            <x>0</x>
            <y>0</y>
-           <width>198</width>
-           <height>522</height>
+           <width>298</width>
+           <height>782</height>
           </rect>
          </property>
         </widget>
@@ -85,13 +85,16 @@
       <item>
        <widget class="QLabel" name="label">
         <property name="text">
-         <string>Video frames</string>
+         <string>Matches</string>
         </property>
        </widget>
       </item>
       <item>
-       <widget class="QScrollArea" name="scrVideoFrames">
+       <widget class="QScrollArea" name="scrMatches">
         <property name="verticalScrollBarPolicy">
+         <enum>Qt::ScrollBarAsNeeded</enum>
+        </property>
+        <property name="horizontalScrollBarPolicy">
          <enum>Qt::ScrollBarAlwaysOff</enum>
         </property>
         <property name="widgetResizable">
@@ -102,38 +105,8 @@
           <rect>
            <x>0</x>
            <y>0</y>
-           <width>570</width>
-           <height>262</height>
-          </rect>
-         </property>
-        </widget>
-       </widget>
-      </item>
-      <item>
-       <widget class="QLabel" name="label_2">
-        <property name="text">
-         <string>Matched slides</string>
-        </property>
-       </widget>
-      </item>
-      <item>
-       <widget class="QScrollArea" name="scrMatches">
-        <property name="verticalScrollBarPolicy">
-         <enum>Qt::ScrollBarAlwaysOff</enum>
-        </property>
-        <property name="horizontalScrollBarPolicy">
-         <enum>Qt::ScrollBarAlwaysOff</enum>
-        </property>
-        <property name="widgetResizable">
-         <bool>true</bool>
-        </property>
-        <widget class="QWidget" name="scrollAreaWidgetContents_3">
-         <property name="geometry">
-          <rect>
-           <x>0</x>
-           <y>0</y>
-           <width>570</width>
-           <height>262</height>
+           <width>870</width>
+           <height>815</height>
           </rect>
          </property>
         </widget>

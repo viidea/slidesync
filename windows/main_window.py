@@ -16,6 +16,10 @@ class ProcessingState(object):
     slides = None              # Path to slides
     video_slides = None        # Slides extracted from video
     timings = None             # Fixed timings for video
+    matches = None
+
+    def __str__(self):
+        return "Files: %s\n Crop box:%s\n Slides: %s \n Video slides: %s\n Matches: %s\n Timings: %s\n" % (self.files, self.slide_crop_box, self.slides, self.video_slides, self.matches, self.timings)
 
 class MainWindow(main_window.Ui_MainWindow, QtGui.QMainWindow):
     # State data
@@ -97,6 +101,7 @@ class MainWindow(main_window.Ui_MainWindow, QtGui.QMainWindow):
 
     def _review_matches(self):
         self._label_set_bold(self.lblReview, True)
+        print self._state
         review_window = ReviewWindow(self, self._state.slides, self._state.video_slides, self._state.matches)
         review_window.show()
         while not review_window.done:
