@@ -14,4 +14,5 @@ setup(name="slidesync",
               "includes" : ["sip", "scipy.io.matlab.streams"],
               "optimize":2
           }
-      })
+      },
+      requires=['numpy', 'scipy', 'pyvideo'])

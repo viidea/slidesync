@@ -1,4 +1,4 @@
-from PyQt4 import uic, QtGui
+from PyQt4 import QtGui
 from processing.slide_matcher import SlideMatcher
 from ui import progress_window
 

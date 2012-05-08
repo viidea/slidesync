@@ -1,5 +1,6 @@
 import logging
 import pyvideo
+from pyvideo.exceptions import MediaException
 
 logger = logging.getLogger(__name__)
 
@@ -44,7 +45,7 @@ class VideoFile(object):
     def load(self):
         try:
             self.source = pyvideo.load(self.filepath)
-        except pyvideo.exceptions.MediaException as e:
+        except MediaException as e:
             raise VideoLoadException("Unknown video format.\n%s" % (e,))
         except IOError as e:
             raise VideoLoadException("Could not load video file.\n%s" % (e,))

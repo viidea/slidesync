@@ -1,7 +1,5 @@
-from PyQt4 import QtGui, QtCore
-from PyQt4.QtGui import QMessageBox
+from PyQt4 import QtGui
 from widgets.video_view import VideoView
-from video import VideoFile, VideoException
 
 class LoadVideoWindow(QtGui.QDialog):
     video = None
@@ -30,22 +28,7 @@ class LoadVideoWindow(QtGui.QDialog):
         self.close()
 
     def showEvent(self, QShowEvent):
-        if self.video is None:
-            filename = QtGui.QFileDialog(self).getOpenFileName(self, "Open slide video file", QtCore.QDir.homePath())
-            if filename == "":
-                return      # User canceled the dialog
-
-            try:
-                video = VideoFile(filename)
-            except VideoException as e:
-                msgBox = QtGui.QMessageBox(QMessageBox.Critical, "Error :(", "Video file could not be opened.")
-                msgBox.setDetailedText(unicode(e))
-                msgBox.exec_()
-                return
-
-            self.video = video
-            # Jump to middle of the video
-            self.video.seek_to(self.video.get_info().duration / 2)
-
-            timestamp, frame = self.video.get_frame()
-            self.video_view.show_frame(frame)
+        # Jump to middle of the video
+        self.video.seek_to(self.video.get_info().duration / 2)
+        timestamp, frame = self.video.get_frame()
+        self.video_view.show_frame(frame)

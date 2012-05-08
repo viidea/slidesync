@@ -29,7 +29,7 @@
       <height>361</height>
      </rect>
     </property>
-    <layout class="QVBoxLayout" name="verticalLayout" stretch="0,0,0,0,0,0,0,0">
+    <layout class="QVBoxLayout" name="verticalLayout" stretch="0,0,0,0,0,0,0">
      <property name="leftMargin">
       <number>10</number>
      </property>
@@ -43,19 +43,9 @@
       <number>30</number>
      </property>
      <item>
-      <widget class="QLabel" name="lblLoadSlideVideo">
+      <widget class="QLabel" name="lblLoadFiles">
        <property name="text">
-        <string>1. Load slide video</string>
-       </property>
-       <property name="alignment">
-        <set>Qt::AlignHCenter|Qt::AlignTop</set>
-       </property>
-      </widget>
-     </item>
-     <item>
-      <widget class="QLabel" name="lblLoadSlides">
-       <property name="text">
-        <string>2. Load slides</string>
+        <string>1. Select files</string>
        </property>
        <property name="alignment">
         <set>Qt::AlignHCenter|Qt::AlignTop</set>
@@ -65,7 +55,7 @@
      <item>
       <widget class="QLabel" name="lblExtractFrames">
        <property name="text">
-        <string>3. Extract frames from slide video</string>
+        <string>2. Extract frames from slide video</string>
        </property>
        <property name="alignment">
         <set>Qt::AlignHCenter|Qt::AlignTop</set>
@@ -75,7 +65,7 @@
      <item>
       <widget class="QLabel" name="lblMatch">
        <property name="text">
-        <string>4. Match slides with frames</string>
+        <string>3. Match slides with frames</string>
        </property>
        <property name="alignment">
         <set>Qt::AlignHCenter|Qt::AlignTop</set>
@@ -85,7 +75,7 @@
      <item>
       <widget class="QLabel" name="lblReview">
        <property name="text">
-        <string>5. Review matched slides</string>
+        <string>4. Review matched slides</string>
        </property>
        <property name="alignment">
         <set>Qt::AlignHCenter|Qt::AlignTop</set>
@@ -95,7 +85,7 @@
      <item>
       <widget class="QLabel" name="lblSync">
        <property name="text">
-        <string>6. Sync slides with main video</string>
+        <string>5. Sync slides with main video</string>
        </property>
        <property name="alignment">
         <set>Qt::AlignHCenter|Qt::AlignTop</set>
@@ -105,7 +95,7 @@
      <item>
       <widget class="QLabel" name="lblSave">
        <property name="text">
-        <string>7. Save slide archive</string>
+        <string>6. Save slide archive</string>
        </property>
        <property name="alignment">
         <set>Qt::AlignCenter</set>

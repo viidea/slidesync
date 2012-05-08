@@ -1,54 +1,65 @@
 from PyQt4 import QtGui, QtCore
 import os
-from PyQt4.QtGui import QMessageBox
+from PyQt4.QtGui import QMessageBox, QDialog
 from processing.utils import package_slides
 from ui import main_window
 from windows.extract_window import ExtractWindow
-from windows.load_video_window import LoadVideoWindow
+from windows.file_chooser_window import FileChooserWindow
 from windows.match_window import MatchWindow
 from windows.review_window import ReviewWindow
 from windows.sync_window import SyncWindow
 
+class ProcessingState(object):
+    files = None               # (Original video, Slide video, Slide dir)
+    video = None
+    slide_crop_box = None      # Crop box for slide video
+    slides = None              # Path to slides
+    video_slides = None        # Slides extracted from video
+    timings = None             # Fixed timings for video
+
 class MainWindow(main_window.Ui_MainWindow, QtGui.QMainWindow):
     # State data
-    _video = None
-    _slide_crop_box = None      # Crop box for slide video
-    _slides = None              # Path to slides
-    _video_slides = None        # Slides extracted from video
-    _timings = None             # Fixed timings for video
+    _state = None
 
     def __init__(self, app):
         super(QtGui.QMainWindow, self).__init__()
         self._app = app
         self.setupUi(self)
         self.btnStart.clicked.connect(self._process)
+        self._state = ProcessingState()
 
     def _process(self):
         self.btnStart.setEnabled(False)
-        self._load_slide_video()
-        self._load_slides()
-        self._extract_frames()
-        self._match_slides()
-        self._review_matches()
-        self._sync_with_original()
-        self._package_slides()
+
+        if not (self._get_files() and
+                self._load_slides() and
+                self._extract_frames() and
+                self._match_slides() and
+                self._review_matches() and
+                self._sync_with_original() and
+                self._package_slides()):
+
+            # User canceled one of the steps
+            self._clear_state()
+
         self.btnStart.setEnabled(True)
 
-    def _load_slide_video(self):
-        self._label_set_bold(self.lblLoadSlideVideo, True)
-        load_video_win = LoadVideoWindow(self)
-        load_video_win.exec_()
-        self._video = load_video_win.video
-        self._slide_crop_box = load_video_win.selected
-        self._label_set_bold(self.lblLoadSlideVideo, False)
+    def _get_files(self):
+        self._label_set_bold(self.lblLoadFiles, True)
+        select_files_window = FileChooserWindow(self)
+        select_files_window.exec_()
+
+        if select_files_window.result() == QDialog.Accepted:
+            self._state.files = select_files_window.getFiles()
+            self._state.slide_crop_box = select_files_window.getSlideCropBox()
+            self._label_set_bold(self.lblLoadFiles, False)
+            return True
+
+        self._label_set_bold(self.lblLoadFiles, False)
+        return False
 
     def _load_slides(self):
-        self._label_set_bold(self.lblLoadSlides, True)
-        dirname = None
-        while dirname is None:
-            dirname = QtGui.QFileDialog().getExistingDirectory(self, "Open slide directory", QtCore.QDir().homePath())
-
-        dirname = unicode(dirname)  # Convert from QString to unicode string
+        _, _, dirname = self._state.files
         image_slides = []
         num = 0
         try:
@@ -58,17 +69,17 @@ class MainWindow(main_window.Ui_MainWindow, QtGui.QMainWindow):
                     image_slides.append((num, os.path.join(dirname, file)))
                     num += 1
         except IOError as e:
-            msgBox = QMessageBox(QMessageBox.Critical, "Error :(", "Video file could not be opened.")
+            msgBox = QMessageBox(QMessageBox.Critical, "Error :(", "Slides not be loaded.")
             msgBox.setDetailedText(unicode(e))
             msgBox.exec_()
-            return
+            return False
 
         self._slides = image_slides
-        self._label_set_bold(self.lblLoadSlides, False)
+        return True
 
     def _extract_frames(self):
         self._label_set_bold(self.lblExtractFrames, True)
-        extract_window = ExtractWindow(self, self._video, self._slide_crop_box, app=self._app)
+        extract_window = ExtractWindow(self, self._state.video, self._state.slide_crop_box, app=self._app)
         extract_window.exec_()
         self._video_slides = extract_window.video_slides
         self._label_set_bold(self.lblExtractFrames, False)
@@ -111,3 +122,6 @@ class MainWindow(main_window.Ui_MainWindow, QtGui.QMainWindow):
         font = label.font()
         font.setBold(bold)
         label.setFont(font)
+
+    def _clear_state(self):
+        self._state = ProcessingState()
