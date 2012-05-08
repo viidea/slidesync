@@ -3,6 +3,7 @@ import os
 from PyQt4.QtGui import QMessageBox, QDialog
 from processing.utils import package_slides
 from ui import main_window
+from video import VideoFile
 from windows.extract_window import ExtractWindow
 from windows.file_chooser_window import FileChooserWindow
 from windows.match_window import MatchWindow
@@ -11,7 +12,6 @@ from windows.sync_window import SyncWindow
 
 class ProcessingState(object):
     files = None               # (Original video, Slide video, Slide dir)
-    video = None
     slide_crop_box = None      # Crop box for slide video
     slides = None              # Path to slides
     video_slides = None        # Slides extracted from video
@@ -65,7 +65,7 @@ class MainWindow(main_window.Ui_MainWindow, QtGui.QMainWindow):
         try:
             for file in sorted(os.listdir(dirname)):
                 filename, extension = os.path.splitext(file)
-                if extension == ".png":
+                if extension == ".png" or extension == ".jpg":
                     image_slides.append((num, os.path.join(dirname, file)))
                     num += 1
         except IOError as e:
@@ -74,32 +74,36 @@ class MainWindow(main_window.Ui_MainWindow, QtGui.QMainWindow):
             msgBox.exec_()
             return False
 
-        self._slides = image_slides
+        self._state.slides = image_slides
         return True
 
     def _extract_frames(self):
         self._label_set_bold(self.lblExtractFrames, True)
-        extract_window = ExtractWindow(self, self._state.video, self._state.slide_crop_box, app=self._app)
+        video = VideoFile(self._state.files[1])
+        extract_window = ExtractWindow(self, video, self._state.slide_crop_box, app=self._app)
         extract_window.exec_()
-        self._video_slides = extract_window.video_slides
+        self._state.video_slides = extract_window.video_slides
         self._label_set_bold(self.lblExtractFrames, False)
+        return True
 
     def _match_slides(self):
         self._label_set_bold(self.lblMatch, True)
-        match_window = MatchWindow(self, self._app, self._slides, self._video_slides)
+        match_window = MatchWindow(self, self._app, self._state.slides, self._state.video_slides)
         match_window.show()
         match_window.process()
-        self._matches = match_window.matches
+        self._state.matches = match_window.matches
         self._label_set_bold(self.lblMatch, False)
+        return True
 
     def _review_matches(self):
         self._label_set_bold(self.lblReview, True)
-        review_window = ReviewWindow(self, self._slides, self._video_slides, self._matches)
+        review_window = ReviewWindow(self, self._state.slides, self._state.video_slides, self._state.matches)
         review_window.show()
         while not review_window.done:
             self._app.processEvents()
         self._matches = review_window.matches
         self._label_set_bold(self.lblReview, False)
+        return True
 
     def _sync_with_original(self):
         self._label_set_bold(self.lblSync, True)
@@ -108,6 +112,7 @@ class MainWindow(main_window.Ui_MainWindow, QtGui.QMainWindow):
         sync_window.process()
         self._synced_slides = sync_window.timings
         self._label_set_bold(self.lblSync, False)
+        return True
 
     def _package_slides(self):
         self._label_set_bold(self.lblSave, True)

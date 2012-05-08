@@ -15,10 +15,9 @@ class SlideButton(QtGui.QLabel):
         # Drawable caches
         self.pen = QtGui.QPen(QtGui.QColor(255, 0, 0))
         self.pen.setWidth(5)
-        self.font = QtGui.QFont()
-        self.font.setPixelSize(24)
-        self.font.setBold(True)
-        self.disabled_text = QtGui.QStaticText("X")
+        self.disabled_pen = QtGui.QPen(QtGui.QColor(255, 255, 255, 200))
+        self.disabled_pen.setWidth(1)
+        self.brush = QtGui.QBrush(QtGui.QColor(255, 255, 255, 200))
 
         if image_file is not None:
             self.image_path = image_file
@@ -51,9 +50,10 @@ class SlideButton(QtGui.QLabel):
         if self.disabled or self.selected:
             painter = QtGui.QPainter(self.pixmap())
             painter.setPen(self.pen)
+            painter.setBrush(self.brush)
             if self.disabled:
-                painter.setFont(self.font)
-                painter.drawStaticText(10, 10, self.disabled_text)
+                painter.setPen(self.disabled_pen)
+                painter.drawRect(0, 0, self.width(), self.heightForWidth(self.width()))
             if self.selected:
                 painter.drawRect(2, 2, self.width() - 4, self.heightForWidth(self.width()) - 4)
             painter.end()
