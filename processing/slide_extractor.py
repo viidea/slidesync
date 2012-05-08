@@ -79,8 +79,11 @@ class SlideExtractor(object):
 
             if difference > self._treshold:
                 # Save frame to disk
+                cv_original_frame = cv.CreateImage((frame.width, frame.height), cv.IPL_DEPTH_8U, 3)
+                cv.SetData(cv_original_frame, frame.data, frame.width * 3)
+                cv.CvtColor(cv_original_frame, cv_original_frame, cv.CV_RGB2BGR)
                 filepath = os.path.join(self.tmp_dir, "%s (%s).png" % (timestamp, difference,))
-                cv.SaveImage(filepath, cv_frame)
+                cv.SaveImage(filepath, cv_original_frame)
                 self._send_callback(timestamp)
 
                 slides.append((timestamp, filepath))
