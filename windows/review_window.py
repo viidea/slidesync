@@ -65,6 +65,7 @@ class ReviewWindow(QtGui.QMainWindow, review_window.Ui_mwReview):
                 widget.disable()
         else:
             widget.setImage(self._selected_slide.image_path)
+            widget.enable()
             self._selected_slide.deselect()
             self._selected_slide = None
 
