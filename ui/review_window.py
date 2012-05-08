@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'review_window.ui'
 #
-# Created: Tue May  8 15:57:28 2012
+# Created: Tue May  8 16:17:10 2012
 #      by: PyQt4 UI code generator 4.8.5
 #
 # WARNING! All changes made in this file will be lost!
@@ -23,6 +23,23 @@ class Ui_mwReview(object):
         self.centralwidget.setObjectName(_fromUtf8("centralwidget"))
         self.horizontalLayout = QtGui.QHBoxLayout(self.centralwidget)
         self.horizontalLayout.setObjectName(_fromUtf8("horizontalLayout"))
+        self.verticalLayout_2 = QtGui.QVBoxLayout()
+        self.verticalLayout_2.setObjectName(_fromUtf8("verticalLayout_2"))
+        self.label = QtGui.QLabel(self.centralwidget)
+        self.label.setText(QtGui.QApplication.translate("mwReview", "Matches", None, QtGui.QApplication.UnicodeUTF8))
+        self.label.setObjectName(_fromUtf8("label"))
+        self.verticalLayout_2.addWidget(self.label)
+        self.scrMatches = QtGui.QScrollArea(self.centralwidget)
+        self.scrMatches.setVerticalScrollBarPolicy(QtCore.Qt.ScrollBarAsNeeded)
+        self.scrMatches.setHorizontalScrollBarPolicy(QtCore.Qt.ScrollBarAlwaysOff)
+        self.scrMatches.setWidgetResizable(True)
+        self.scrMatches.setObjectName(_fromUtf8("scrMatches"))
+        self.scrollAreaWidgetContents_2 = QtGui.QWidget()
+        self.scrollAreaWidgetContents_2.setGeometry(QtCore.QRect(0, 0, 870, 815))
+        self.scrollAreaWidgetContents_2.setObjectName(_fromUtf8("scrollAreaWidgetContents_2"))
+        self.scrMatches.setWidget(self.scrollAreaWidgetContents_2)
+        self.verticalLayout_2.addWidget(self.scrMatches)
+        self.horizontalLayout.addLayout(self.verticalLayout_2)
         self.verticalLayout = QtGui.QVBoxLayout()
         self.verticalLayout.setSizeConstraint(QtGui.QLayout.SetDefaultConstraint)
         self.verticalLayout.setObjectName(_fromUtf8("verticalLayout"))
@@ -52,23 +69,6 @@ class Ui_mwReview(object):
         self.btnDone.setObjectName(_fromUtf8("btnDone"))
         self.verticalLayout.addWidget(self.btnDone)
         self.horizontalLayout.addLayout(self.verticalLayout)
-        self.verticalLayout_2 = QtGui.QVBoxLayout()
-        self.verticalLayout_2.setObjectName(_fromUtf8("verticalLayout_2"))
-        self.label = QtGui.QLabel(self.centralwidget)
-        self.label.setText(QtGui.QApplication.translate("mwReview", "Matches", None, QtGui.QApplication.UnicodeUTF8))
-        self.label.setObjectName(_fromUtf8("label"))
-        self.verticalLayout_2.addWidget(self.label)
-        self.scrMatches = QtGui.QScrollArea(self.centralwidget)
-        self.scrMatches.setVerticalScrollBarPolicy(QtCore.Qt.ScrollBarAsNeeded)
-        self.scrMatches.setHorizontalScrollBarPolicy(QtCore.Qt.ScrollBarAlwaysOff)
-        self.scrMatches.setWidgetResizable(True)
-        self.scrMatches.setObjectName(_fromUtf8("scrMatches"))
-        self.scrollAreaWidgetContents_2 = QtGui.QWidget()
-        self.scrollAreaWidgetContents_2.setGeometry(QtCore.QRect(0, 0, 870, 815))
-        self.scrollAreaWidgetContents_2.setObjectName(_fromUtf8("scrollAreaWidgetContents_2"))
-        self.scrMatches.setWidget(self.scrollAreaWidgetContents_2)
-        self.verticalLayout_2.addWidget(self.scrMatches)
-        self.horizontalLayout.addLayout(self.verticalLayout_2)
         mwReview.setCentralWidget(self.centralwidget)
 
         self.retranslateUi(mwReview)

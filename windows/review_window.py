@@ -64,9 +64,11 @@ class ReviewWindow(QtGui.QMainWindow, review_window.Ui_mwReview):
             h_layout.addLayout(info_box_layout)
 
             video_slide = SlideButton(image_file=video_slide[1], time=video_slide[0], selectable=False)
+            video_slide.setMaximumHeight(300)
             video_widgets.append(video_slide)
             h_layout.addWidget(video_slide)
             matched_slide = SlideButton(image_file=matched_slide[1], time=matched_slide[0], selected_callback=self._match_clicked, selectable=False, num=(matched_slide[0] + 1))
+            video_slide.setMaximumHeight(300)
             match_widgets.append(matched_slide)
             h_layout.addWidget(matched_slide)
 

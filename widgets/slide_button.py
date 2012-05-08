@@ -5,7 +5,6 @@ class SlideButton(QtGui.QLabel, object):
     selected = False
     disabled = False
     _image = None
-    _num_text = None
 
     def __init__(self, time=None, image_file=None, parent=None, selectable=False, selected_callback=None, num=None):
         super(SlideButton, self).__init__(parent)
@@ -16,7 +15,7 @@ class SlideButton(QtGui.QLabel, object):
 
         # Drawable caches
         self.font = QtGui.QFont()
-        self.font.setPixelSize(20)
+        self.font.setPointSize(20)
         self.font.setBold(True)
 
         self.pen = QtGui.QPen(QtGui.QColor(255, 0, 0))
@@ -27,9 +26,6 @@ class SlideButton(QtGui.QLabel, object):
         self.disabled_pen = QtGui.QPen(QtGui.QColor(255, 255, 255, 200))
         self.disabled_pen.setWidth(1)
         self.white_brush = QtGui.QBrush(QtGui.QColor(255, 255, 255, 200))
-
-        if num is not None:
-            self._num_text = QtGui.QStaticText(str(num))
 
         if image_file is not None:
             self.image_path = image_file
@@ -77,12 +73,19 @@ class SlideButton(QtGui.QLabel, object):
 
             painter.setBrush(self.white_brush)
             painter.setPen(self.box_pen)
-            painter.drawRect(8, 8, 4 + self._num_text.size().width(), 4 + self._num_text.size().height())
-            painter.setFont(self.font)
+            metrics = QtGui.QFontMetrics(self.font)
+
+            if not self.disabled:
+                text = str(self._num)
+            else:
+                text = "XX"
+
+            painter.drawRect(8, 8, 4 + metrics.width(text), 4 + metrics.height())
 
             if not self.disabled:
                 painter.setPen(self.pen)
-            painter.drawStaticText(10, 10, self._num_text)
+            painter.setFont(self.font)
+            painter.drawText(QtCore.QPoint(10, 6 + metrics.height()), text)
 
 
     def heightForWidth(self, width):
@@ -94,6 +97,7 @@ class SlideButton(QtGui.QLabel, object):
 
     def disable(self):
         self.disabled = True
+        self._num_text = QtGui.QStaticText("XX")
         self.update()
 
     def enable(self):
@@ -118,7 +122,6 @@ class SlideButton(QtGui.QLabel, object):
 
     def _set_num(self, num):
         self._num = num
-        self._num_text = QtGui.QStaticText(str(num))
 
     num = property(_get_num, _set_num)
 
