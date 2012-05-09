@@ -15,8 +15,7 @@ class SyncWindow(QtGui.QDialog, progress_window.Ui_Dialog):
         self.lblInfo.setText("Syncing videos...")
 
     def process(self):
-        slide_syncer = SlideSyncer(unicode(self._original_video), self._camera_video)
-        self.timings = slide_syncer.get_synced_timings(self._slide_data)
+
         self.close()
 
     def _update_progress(self, value, min = 0, max = 100):

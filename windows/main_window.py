@@ -1,6 +1,7 @@
 from PyQt4 import QtGui, QtCore
 import os
 from PyQt4.QtGui import QMessageBox, QDialog
+from processing.slide_syncer import SlideSyncer
 from processing.utils import package_slides
 from ui import main_window
 from video import VideoFile
@@ -17,9 +18,11 @@ class ProcessingState(object):
     video_slides = None        # Slides extracted from video
     timings = None             # Fixed timings for video
     matches = None
+    synced_slides = None
 
     def __str__(self):
-        return "Files: %s\n Crop box:%s\n Slides: %s \n Video slides: %s\n Matches: %s\n Timings: %s\n" % (self.files, self.slide_crop_box, self.slides, self.video_slides, self.matches, self.timings)
+        return "Files: %s\n Crop box:%s\n Slides: %s \n Video slides: %s\n Matches: %s\n Timings: %s Matches: %s\n Synced slides: %s\n" \
+            % (self.files, self.slide_crop_box, self.slides, self.video_slides, self.matches, self.timings, self.matches, self.synced_slides)
 
 class MainWindow(main_window.Ui_MainWindow, QtGui.QMainWindow):
     # State data
@@ -106,16 +109,14 @@ class MainWindow(main_window.Ui_MainWindow, QtGui.QMainWindow):
         review_window.show()
         while not review_window.done:
             self._app.processEvents()
-        self._matches = review_window.matches
+        self._state.matches = review_window.matches
         self._label_set_bold(self.lblReview, False)
         return True
 
     def _sync_with_original(self):
         self._label_set_bold(self.lblSync, True)
-        sync_window = SyncWindow(self, self._app, self._state.files[0], self._state.files[1], self._matches)
-        sync_window.show()
-        sync_window.process()
-        self._synced_slides = sync_window.timings
+        slide_syncer = SlideSyncer(self._state.files[0], self._state.files[1])
+        self._state.synced_slides = slide_syncer.get_synced_timings(self._state.matches)
         self._label_set_bold(self.lblSync, False)
         return True
 
@@ -125,13 +126,15 @@ class MainWindow(main_window.Ui_MainWindow, QtGui.QMainWindow):
         while filename is None:
             filename = QtGui.QFileDialog().getSaveFileName(self, "Save file...", QtCore.QDir().homePath(), "Zip files (*.zip)")
 
-        package_slides(unicode(filename), self._synced_slides)
+        package_slides(unicode(filename), [slide for num, slide in self._state.slides],  self._state.synced_slides)
         self._label_set_bold(self.lblSave, False)
 
     def _label_set_bold(self, label, bold=True):
         font = label.font()
         font.setBold(bold)
         label.setFont(font)
+        self.update()
+        self._app.processEvents()
 
     def _clear_state(self):
         self._state = ProcessingState()
