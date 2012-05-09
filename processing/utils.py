@@ -16,6 +16,13 @@ def package_slides(output_file, slides, slide_data):
     for time, file in slide_data:
         timings[time] = os.path.basename(file)
 
+    # Check for timings.txt and add it
+    if len(slides) > 0:
+        slide_path = os.path.dirname(slides[0])
+        titles = os.path.join(slide_path, "titles.txt")
+        if os.path.exists(titles):
+            zip_file.write(titles, arcname="titles.txt")
+
     timings_json = json.dumps(timings, sort_keys=True)
     logger.info("JSON timings: %s", timings_json)
     zip_file.writestr("timings.txt", timings_json)
