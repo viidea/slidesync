@@ -1,4 +1,4 @@
-from PyQt4 import QtGui
+from PyQt4 import QtGui, QtCore
 import itertools
 import time
 from ui import review_window
@@ -56,23 +56,20 @@ class ReviewWindow(QtGui.QMainWindow, review_window.Ui_mwReview):
 
         for video_slide, matched_slide in itertools.izip(video_slides, matched_slides):
             h_layout = QtGui.QHBoxLayout()
-
-            info_box_layout = QtGui.QVBoxLayout()
-            time_label = QtGui.QLabel()
-            time_label.setText(self._format_time(video_slide[0]))
-            info_box_layout.addWidget(time_label)
-            h_layout.addLayout(info_box_layout)
-
-            video_slide = SlideButton(image_file=video_slide[1], time=video_slide[0], selectable=False)
-            video_slide.setMaximumHeight(300)
-            video_widgets.append(video_slide)
-            h_layout.addWidget(video_slide)
+            video_slide_btn = SlideButton(image_file=video_slide[1], time=video_slide[0], selectable=False)
+            video_slide_btn.setMaximumHeight(300)
+            video_widgets.append(video_slide_btn)
+            h_layout.addWidget(video_slide_btn)
             matched_slide = SlideButton(image_file=matched_slide[1], time=matched_slide[0], selected_callback=self._match_clicked, selectable=False, num=(matched_slide[0] + 1))
-            video_slide.setMaximumHeight(300)
+            video_slide_btn.setMaximumHeight(300)
             match_widgets.append(matched_slide)
             h_layout.addWidget(matched_slide)
-
             layout.addLayout(h_layout)
+
+            time_label = QtGui.QLabel()
+            time_label.setText(self._format_time(video_slide[0]))
+            time_label.setAlignment(QtCore.Qt.AlignCenter)
+            layout.addWidget(time_label)
 
             line = QtGui.QFrame()
             line.setFrameShape(QtGui.QFrame.HLine)
