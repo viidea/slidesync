@@ -115,8 +115,9 @@ class MainWindow(main_window.Ui_MainWindow, QtGui.QMainWindow):
 
     def _sync_with_original(self):
         self._label_set_bold(self.lblSync, True)
-        slide_syncer = SlideSyncer(self._state.files[0], self._state.files[1])
-        self._state.synced_slides = slide_syncer.get_synced_timings(self._state.matches)
+        sync_window = SyncWindow(self, self._app, self._state.files[0], self._state.files[1], self._state.matches)
+        sync_window.show()
+        self._state.synced_slides = sync_window.process()
         self._label_set_bold(self.lblSync, False)
         return True
 

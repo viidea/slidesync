@@ -38,13 +38,13 @@ class VideoFile(object):
     _current_frame_timestamp = None
     _fps = None
 
-    def __init__(self, filepath):
+    def __init__(self, filepath, keyframes_only = False):
         self.filepath = unicode(filepath)
-        self.load()
+        self.load(keyframes_only)
 
-    def load(self):
+    def load(self, keyframes_only=False):
         try:
-            self.source = pyvideo.load(self.filepath)
+            self.source = pyvideo.load(self.filepath, keyframes_only=keyframes_only)
         except MediaException as e:
             raise VideoLoadException("Unknown video format.\n%s" % (e,))
         except IOError as e:
