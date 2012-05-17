@@ -126,8 +126,12 @@ class MainWindow(main_window.Ui_MainWindow, QtGui.QMainWindow):
         while filename is None:
             filename = QtGui.QFileDialog().getSaveFileName(self, "Save file...", QtCore.QDir().homePath(), "Zip files (*.zip)")
 
+        if len(filename) == 0:
+            return False
+
         package_slides(unicode(filename), [slide for num, slide in self._state.slides],  self._state.synced_slides)
         self._label_set_bold(self.lblSave, False)
+        return True
 
     def _label_set_bold(self, label, bold=True):
         font = label.font()
