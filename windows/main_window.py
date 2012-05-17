@@ -72,7 +72,7 @@ class MainWindow(main_window.Ui_MainWindow, QtGui.QMainWindow):
         try:
             for file in sorted(os.listdir(dirname)):
                 filename, extension = os.path.splitext(file)
-                if extension == ".png" or extension == ".jpg":
+                if extension.lower() == ".png" or extension.lower() == ".jpg":
                     image_slides.append((num, os.path.join(dirname, file)))
                     num += 1
         except IOError as e:

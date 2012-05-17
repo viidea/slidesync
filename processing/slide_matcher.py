@@ -102,6 +102,7 @@ class SlideMatcher(object):
 
     def _get_flann_index(self, images):
         descriptors = tuple([image.descriptors for i_num, image in images.items()])
+
         # Stack descriptors together
         stack = numpy.vstack(descriptors)
 
