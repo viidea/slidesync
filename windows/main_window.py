@@ -86,7 +86,7 @@ class MainWindow(main_window.Ui_MainWindow, QtGui.QMainWindow):
 
     def _extract_frames(self):
         self._label_set_bold(self.lblExtractFrames, True)
-        video = VideoFile(self._state.files[1])
+        video = VideoFile(self._state.files[1], keyframes_only=False)
         extract_window = ExtractWindow(self, video, self._state.slide_crop_box, app=self._app)
         extract_window.exec_()
         self._state.video_slides = extract_window.video_slides
