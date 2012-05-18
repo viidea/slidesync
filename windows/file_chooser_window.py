@@ -19,7 +19,7 @@ class FileChooserWindow(QtGui.QDialog, file_chooser_dialog.Ui_Dialog):
         self.buttonBox.button(QDialogButtonBox.Ok).setEnabled(False)
 
     def _select_slide_video(self):
-        filename = QtGui.QFileDialog(self).getOpenFileName(self, "Open original video file", QtCore.QDir().homePath())
+        filename = QtGui.QFileDialog(self).getOpenFileName(self, "Open slide video file", QtCore.QDir().homePath())
         if filename == "":
             return      # User canceled the dialog
         filename = unicode(filename)
