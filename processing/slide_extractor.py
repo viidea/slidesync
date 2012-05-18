@@ -1,9 +1,44 @@
+import Queue
 from cv2 import cv
 import logging
 import os
 import tempfile
+from threading import Thread
 
 logger = logging.getLogger(__name__)
+
+class VideoProcessor(Thread):
+    frame_queue = Queue.Queue(maxsize=100)
+    done = False
+
+    def __init__(self, video):
+        Thread.__init__(self)
+        self._video = video
+
+    def run(self):
+        timestamp = -1
+        while timestamp is not None:
+            timestamp, frame = self._video.get_next_frame()
+            self.frame_queue.put((timestamp, frame,))
+        self.done = True
+
+class ImageSave(Thread):
+    image_queue = Queue.Queue()
+    done = False
+
+    def __init__(self):
+        Thread.__init__(self)
+
+    def run(self):
+        while True:
+            try:
+                image_path, image = self.image_queue.get(timeout=2)
+                cv.SaveImage(image_path, image)
+            except Queue.Empty:
+                pass
+
+            if self.done:
+                return
 
 class SlideExtractor(object):
     SKIP_COUNT = 50
@@ -39,11 +74,25 @@ class SlideExtractor(object):
 
         slides = []
 
-        while True:
-            for i in range(0, self.SKIP_COUNT):
-                timestamp, frame = self._video_file.get_next_frame()
+        video_thread = VideoProcessor(self._video_file)
+        video_thread.setDaemon(True)
+        video_thread.start()
 
-            if timestamp is None:
+        image_save_thread = ImageSave()
+        image_save_thread.setDaemon(True)
+        image_save_thread.start()
+
+        while not video_thread.done:
+            for i in range(0, self.SKIP_COUNT):
+                if video_thread.done:
+                    break
+
+                try:
+                    timestamp, frame = video_thread.frame_queue.get(timeout=5)
+                except Queue.Empty:
+                    break
+
+            if video_thread.done:
                 logger.info("Extraction done!")
                 break
 
@@ -83,15 +132,15 @@ class SlideExtractor(object):
                 cv.SetData(cv_original_frame, frame.data, frame.width * 3)
                 cv.CvtColor(cv_original_frame, cv_original_frame, cv.CV_RGB2BGR)
                 filepath = os.path.join(self.tmp_dir, "%s (%s).png" % (timestamp, difference,))
-                cv.SaveImage(filepath, cv_original_frame)
+                image_save_thread.image_queue.put((filepath, cv_original_frame))
                 self._send_callback(timestamp)
-
                 slides.append((timestamp, filepath))
             else:
                 self._send_callback(timestamp)
 
             current_frame = cv_frame
 
+        image_save_thread.done = True
         return slides
 
     def _create_temp_dir(self):
