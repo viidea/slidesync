@@ -89,7 +89,7 @@ class SlideButton(QtGui.QLabel, object):
 
 
     def heightForWidth(self, width):
-        if self._image is None:
+        if self._image is None or self._image.width() == 0:
             return width
 
         height = int(float(self._image.height()) / float(self._image.width()) * width)

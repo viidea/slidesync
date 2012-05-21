@@ -12,11 +12,13 @@ class ExtractWindow(extract_dialog.Ui_dlgExtract, QtGui.QDialog):
         self._app = app
         self.setupUi(self)
         self.prgProgress.setVisible(False)
+        self.sldTreshold.setEnabled(True)
         self.btnExtract.pressed.connect(self._extract)
         self._update_treshold_label()
         self.sldTreshold.valueChanged.connect(self._update_treshold_label)
 
     def _extract(self):
+        self.sldTreshold.setEnabled(False)
         self.prgProgress.setVisible(True)
         self.btnExtract.setEnabled(False)
         extractor = SlideExtractor(self._video,

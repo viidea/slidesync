@@ -72,7 +72,7 @@ class MainWindow(main_window.Ui_MainWindow, QtGui.QMainWindow):
         try:
             for file in sorted(os.listdir(dirname)):
                 filename, extension = os.path.splitext(file)
-                if extension == ".png" or extension == ".jpg":
+                if extension.lower() == ".png" or extension.lower() == ".jpg":
                     image_slides.append((num, os.path.join(dirname, file)))
                     num += 1
         except IOError as e:
@@ -86,7 +86,7 @@ class MainWindow(main_window.Ui_MainWindow, QtGui.QMainWindow):
 
     def _extract_frames(self):
         self._label_set_bold(self.lblExtractFrames, True)
-        video = VideoFile(self._state.files[1])
+        video = VideoFile(self._state.files[1], keyframes_only=False)
         extract_window = ExtractWindow(self, video, self._state.slide_crop_box, app=self._app)
         extract_window.exec_()
         self._state.video_slides = extract_window.video_slides
@@ -115,8 +115,9 @@ class MainWindow(main_window.Ui_MainWindow, QtGui.QMainWindow):
 
     def _sync_with_original(self):
         self._label_set_bold(self.lblSync, True)
-        slide_syncer = SlideSyncer(self._state.files[0], self._state.files[1])
-        self._state.synced_slides = slide_syncer.get_synced_timings(self._state.matches)
+        sync_window = SyncWindow(self, self._app, self._state.files[0], self._state.files[1], self._state.matches)
+        sync_window.show()
+        self._state.synced_slides = sync_window.process()
         self._label_set_bold(self.lblSync, False)
         return True
 
@@ -126,8 +127,12 @@ class MainWindow(main_window.Ui_MainWindow, QtGui.QMainWindow):
         while filename is None:
             filename = QtGui.QFileDialog().getSaveFileName(self, "Save file...", QtCore.QDir().homePath(), "Zip files (*.zip)")
 
+        if len(filename) == 0:
+            return False
+
         package_slides(unicode(filename), [slide for num, slide in self._state.slides],  self._state.synced_slides)
         self._label_set_bold(self.lblSave, False)
+        return True
 
     def _label_set_bold(self, label, bold=True):
         font = label.font()
