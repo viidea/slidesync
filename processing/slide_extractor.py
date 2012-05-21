@@ -133,11 +133,9 @@ class SlideExtractor(object):
                 cv.CvtColor(cv_original_frame, cv_original_frame, cv.CV_RGB2BGR)
                 filepath = os.path.join(self.tmp_dir, "%s (%s).png" % (timestamp, difference,))
                 image_save_thread.image_queue.put((filepath, cv_original_frame))
-                self._send_callback(timestamp)
                 slides.append((timestamp, filepath))
-            else:
-                self._send_callback(timestamp)
 
+            self._send_callback(timestamp)
             current_frame = cv_frame
 
         image_save_thread.done = True

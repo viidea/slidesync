@@ -36,6 +36,7 @@ class ExtractWindow(extract_dialog.Ui_dlgExtract, QtGui.QDialog):
             self.prgProgress.setMaximum(max)
 
         self.prgProgress.setValue(value)
+        self.prgProgress.update()
 
         if self._app is not None:
             self._app.processEvents()
