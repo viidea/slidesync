@@ -81,6 +81,11 @@ class MainWindow(main_window.Ui_MainWindow, QtGui.QMainWindow):
             msgBox.exec_()
             return False
 
+        if len(image_slides) == 0:
+            msgBox = QMessageBox(QMessageBox.Critical, "Error :(", "Chosen slide directory does not contain any slides, aborting...")
+            msgBox.exec_()
+            return False
+
         self._state.slides = image_slides
         return True
 
