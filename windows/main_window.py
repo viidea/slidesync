@@ -1,4 +1,5 @@
 from PyQt4 import QtGui, QtCore
+import logging
 import os
 from PyQt4.QtGui import QMessageBox, QDialog
 from processing.slide_syncer import SlideSyncer
@@ -10,6 +11,8 @@ from windows.file_chooser_window import FileChooserWindow
 from windows.match_window import MatchWindow
 from windows.review_window import ReviewWindow
 from windows.sync_window import SyncWindow
+
+logger = logging.getLogger(__name__)
 
 class ProcessingState(object):
     files = None               # (Original video, Slide video, Slide dir)
@@ -109,7 +112,7 @@ class MainWindow(main_window.Ui_MainWindow, QtGui.QMainWindow):
 
     def _review_matches(self):
         self._label_set_bold(self.lblReview, True)
-        print self._state
+        logger.info(self._state)
         review_window = ReviewWindow(self, self._state.slides, self._state.video_slides, self._state.matches)
         review_window.show()
         while not review_window.done:

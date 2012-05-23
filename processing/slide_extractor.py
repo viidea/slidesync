@@ -21,6 +21,13 @@ class VideoProcessor(Thread):
         while timestamp is not None:
             timestamp, frame = self._video.get_next_frame()
             self.frame_queue.put((timestamp, frame,))
+
+            # Flush audio data
+            while True:
+                audio_frame = self._video.get_audio_data()
+                if audio_frame is None or audio_frame.timestamp > timestamp:
+                    break
+
         self.done = True
 
 class ImageSave(Thread):
@@ -161,8 +168,6 @@ class SlideExtractor(object):
         diff = descriptor1 - descriptor2
         diff = diff * diff
         distance = diff.sum() / len(descriptor1)
-        print distance
-
         return distance
 
     def _create_temp_dir(self):

@@ -75,6 +75,9 @@ class VideoFile(object):
         self._current_frame = self.source.get_next_video_frame()
         return self._current_frame_timestamp, self._current_frame
 
+    def get_audio_data(self):
+        return self.source.get_audio_data()
+
     def _determine_fps(self):
         """
         This consumes one frame to determine FPS
