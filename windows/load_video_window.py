@@ -14,7 +14,7 @@ class LoadVideoWindow(QtGui.QDialog):
         self.video_view = VideoView(selectable=True)
         layout = QtGui.QVBoxLayout()
         layout.addWidget(self.video_view)
-
+        layout.addStretch()
         self.ok_button = QtGui.QPushButton("OK")
         self.ok_button.clicked.connect(self._close)
         layout.addWidget(self.ok_button)
