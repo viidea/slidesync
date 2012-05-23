@@ -16,16 +16,11 @@ class ReviewWindow(QtGui.QMainWindow, review_window.Ui_mwReview):
         self._video_slides = video_slides
         self._matches = matches
         self.setupUi(self)
-        #self.scrVideoFrames.horizontalScrollBar().valueChanged.connect(self._video_scrolled)
         self.btnDone.clicked.connect(self._done)
         self._slide_widgets = self._show_slides(self.scrSlides, self._slides, horizontal=False, click_cb=self._slide_clicked)
         match_list = [(self._matches[time], self._slides[self._matches[time]][1]) for time in sorted(self._matches.iterkeys())]
         self._video_widgets, self._match_widgets = self._populate_matches(self._video_slides, match_list)
         self._disable_matched_duplicates()
-
-        #self._video_widgets = self._show_slides(self.scrVideoFrames, self._video_slides, selectable=False)
-        #self._match_widgets = self._show_slides(self.scrMatches, match_list, selectable=False, click_cb=self._match_clicked)
-
 
     def _show_slides(self, container, slides, horizontal=True, click_cb=None, selectable=True):
         widgets = []

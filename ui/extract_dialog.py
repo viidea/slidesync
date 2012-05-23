@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'extract_dialog.ui'
 #
-# Created: Mon May 07 10:34:37 2012
+# Created: Wed May 23 11:23:13 2012
 #      by: PyQt4 UI code generator 4.9.1
 #
 # WARNING! All changes made in this file will be lost!
@@ -17,7 +17,7 @@ except AttributeError:
 class Ui_dlgExtract(object):
     def setupUi(self, dlgExtract):
         dlgExtract.setObjectName(_fromUtf8("dlgExtract"))
-        dlgExtract.resize(568, 170)
+        dlgExtract.resize(568, 189)
         sizePolicy = QtGui.QSizePolicy(QtGui.QSizePolicy.Fixed, QtGui.QSizePolicy.Fixed)
         sizePolicy.setHorizontalStretch(0)
         sizePolicy.setVerticalStretch(0)
@@ -41,7 +41,8 @@ class Ui_dlgExtract(object):
         self.verticalLayout.addLayout(self.horizontalLayout)
         self.sldTreshold = QtGui.QSlider(dlgExtract)
         self.sldTreshold.setMinimum(1)
-        self.sldTreshold.setSliderPosition(10)
+        self.sldTreshold.setMaximum(20)
+        self.sldTreshold.setSliderPosition(3)
         self.sldTreshold.setOrientation(QtCore.Qt.Horizontal)
         self.sldTreshold.setTickPosition(QtGui.QSlider.TicksBelow)
         self.sldTreshold.setTickInterval(10)

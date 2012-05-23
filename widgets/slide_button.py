@@ -1,3 +1,5 @@
+import Image
+import ImageQt
 from PyQt4 import QtGui, QtCore
 
 class SlideButton(QtGui.QLabel, object):
@@ -29,11 +31,21 @@ class SlideButton(QtGui.QLabel, object):
 
         if image_file is not None:
             self.image_path = image_file
-            self._image = QtGui.QPixmap(image_file)
 
         size_policy = QtGui.QSizePolicy(QtGui.QSizePolicy.MinimumExpanding, QtGui.QSizePolicy.MinimumExpanding)
         size_policy.setHeightForWidth(True)
         self.setSizePolicy(size_policy)
+
+    def _load_pixmap(self):
+        """
+        Loads pixmap via PIL - QPixmap loading has problems with JPEGs on Windows
+        """
+        if not self.image_path:
+            return
+
+        pil_image = Image.open(self.image_path)
+        qt_image = ImageQt.ImageQt(pil_image).copy()
+        self._image = QtGui.QPixmap.fromImage(qt_image)
 
     def sizeHint(self):
         return QtCore.QSize(200, self.heightForWidth(200))
@@ -52,8 +64,13 @@ class SlideButton(QtGui.QLabel, object):
 
     def update(self):
         super(SlideButton, self).update()
-        if self._image is not None:
-            self.setPixmap(self._image.scaledToWidth(self.width(), mode=QtCore.Qt.SmoothTransformation))
+        if self._image is None and self.image_path is not None:
+            self._load_pixmap()
+
+        if self._image is None:
+            return
+
+        self.setPixmap(self._image.scaledToWidth(self.width(), mode=QtCore.Qt.SmoothTransformation))
 
         painter = None
         if self.disabled or self.selected:
