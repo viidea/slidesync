@@ -4,6 +4,7 @@ import logging
 import os
 import tempfile
 from threading import Thread
+import numpy
 
 logger = logging.getLogger(__name__)
 
@@ -41,10 +42,10 @@ class ImageSave(Thread):
                 return
 
 class SlideExtractor(object):
-    SKIP_COUNT = 50
-    _treshold = 10
+    SKIP_COUNT = 25
+    _treshold = 50
 
-    def __init__(self, video_file, cropbox=None, callback=None, grayscale=False, treshold=10):
+    def __init__(self, video_file, cropbox=None, callback=None, grayscale=False, treshold=50):
         self._video_file = video_file
         self._callback = callback
         self._cropbox = cropbox
@@ -69,6 +70,7 @@ class SlideExtractor(object):
 
         pixel_count = width * height * self._channels
         current_frame = None
+        current_frame_descriptor = None
         timestamp = None
         frame = None
 
@@ -126,20 +128,42 @@ class SlideExtractor(object):
                 cv.AbsDiff(current_frame, cv_frame, diff)
                 difference = sum(cv.Sum(diff)) / pixel_count        # Normalize difference with pixel count
 
-            if difference > self._treshold:
-                # Save frame to disk
-                cv_original_frame = cv.CreateImage((frame.width, frame.height), cv.IPL_DEPTH_8U, 3)
-                cv.SetData(cv_original_frame, frame.data, frame.width * 3)
-                cv.CvtColor(cv_original_frame, cv_original_frame, cv.CV_RGB2BGR)
-                filepath = os.path.join(self.tmp_dir, "%s (%s).png" % (timestamp, difference,))
-                image_save_thread.image_queue.put((filepath, cv_original_frame))
-                slides.append((timestamp, filepath))
+            if difference > 1.5:
+                # Check the secondary metric
+                frame_descriptor = self._get_frame_descriptor(cv_frame)
+                dd = 0
+                if current_frame_descriptor is not None:
+                    dd = self._get_descriptor_distance(current_frame_descriptor, frame_descriptor)
+                if current_frame_descriptor is None or \
+                    dd > self._treshold:
+                    # Save frame to disk
+                    cv_original_frame = cv.CreateImage((frame.width, frame.height), cv.IPL_DEPTH_8U, 3)
+                    cv.SetData(cv_original_frame, frame.data, frame.width * 3)
+                    cv.CvtColor(cv_original_frame, cv_original_frame, cv.CV_RGB2BGR)
+                    filepath = os.path.join(self.tmp_dir, "%s (%s).png" % (timestamp, dd,))
+                    image_save_thread.image_queue.put((filepath, cv_original_frame))
+                    slides.append((timestamp, filepath))
+                    current_frame_descriptor = frame_descriptor
 
             self._send_callback(timestamp)
             current_frame = cv_frame
 
         image_save_thread.done = True
         return slides
+
+    def _get_frame_descriptor(self, frame):
+        small_frame = cv.CreateMat(frame.height / 10, frame.width / 10, cv.CV_8UC3)
+        cv.Resize(frame, small_frame)
+        descriptor = cv.Reshape(small_frame, 1, small_frame.rows * small_frame.cols)
+        return numpy.asarray(descriptor)
+
+    def _get_descriptor_distance(self, descriptor1, descriptor2):
+        diff = descriptor1 - descriptor2
+        diff = diff * diff
+        distance = diff.sum() / len(descriptor1)
+        print distance
+
+        return distance
 
     def _create_temp_dir(self):
         try:
