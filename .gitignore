@@ -1,2 +1,4 @@
 *.pyc
+*.dll
+debug.txt
 .idea/*
