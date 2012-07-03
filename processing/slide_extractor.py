@@ -117,15 +117,6 @@ class SlideExtractor(object):
                 self._fix_contrast(gray_frame)
                 cv.Threshold(gray_frame, gray_frame, 50, 255, cv.CV_THRESH_BINARY)
                 cv_frame = gray_frame
-            else:
-                r = cv.CreateImage(cv.GetSize(cv_frame), cv.IPL_DEPTH_8U, 1)
-                g = cv.CreateImage(cv.GetSize(cv_frame), cv.IPL_DEPTH_8U, 1)
-                b = cv.CreateImage(cv.GetSize(cv_frame), cv.IPL_DEPTH_8U, 1)
-                cv.Split(cv_frame, r, g, b, None)
-                self._fix_contrast(r)
-                self._fix_contrast(g)
-                self._fix_contrast(b)
-                cv.Merge(b, g, r, None, cv_frame)
 
             if current_frame is None:
                 difference = 2**30      # Make sure to grab first frame
