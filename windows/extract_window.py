@@ -23,7 +23,6 @@ class ExtractWindow(extract_dialog.Ui_dlgExtract, QtGui.QDialog):
         self.btnExtract.setEnabled(False)
         extractor = SlideExtractor(self._video,
                                    cropbox=self._crop_box,
-                                   grayscale=False,
                                    callback=self._update_progress,
                                    treshold=self._treshold)
         self.video_slides = extractor.extract_slides()
