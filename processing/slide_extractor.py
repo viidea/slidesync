@@ -50,7 +50,7 @@ class ImageSave(Thread):
                 return
 
 class SlideExtractor(object):
-    FRAME_SKIP = 25
+    FRAME_SKIP = 10
 
     def __init__(self, video_file, cropbox=None, callback=None, treshold=50):
         self._video_file = video_file
@@ -91,6 +91,9 @@ class SlideExtractor(object):
 
             frame_counter += 1
             if frame_counter % self.FRAME_SKIP != 0:
+                continue
+
+            if frame is None:
                 continue
 
             assert frame.format == "RGB"
@@ -135,13 +138,15 @@ class SlideExtractor(object):
         while not video_thread.done:
             if video_thread.done:
                 break
-
             try:
                 timestamp, frame = video_thread.frame_queue.get(timeout=5)
             except Queue.Empty:
                 break
 
             frame_counter += 1
+            if frame is None:
+                continue
+
             if frame_counter in peaks:
                 cv_frame = cv.CreateImage((frame.width, frame.height), cv.IPL_DEPTH_8U, 3)
                 cv.SetData(cv_frame, frame.data, frame.width * 3)
@@ -174,9 +179,8 @@ def _get_diff_peaks(diff_signal):
         del diff_signal[0]
 
     std_dev = numpy.std(diff_signal)
-    diff_signal = _smooth(diff_signal, 2)
     # Do tresholding to remove noise
-    diff_signal = numpy.where(diff_signal > 0.3 * std_dev, diff_signal, 0)
+    diff_signal = numpy.where(diff_signal > 0.5 * std_dev, diff_signal, 0)
     peaks = _find_peaks(diff_signal)
     return peaks
 
