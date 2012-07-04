@@ -1,6 +1,7 @@
 import Image
 import ImageQt
 from PyQt4 import QtGui, QtCore
+import os
 
 class SlideButton(QtGui.QLabel, object):
     image_path = None
@@ -43,9 +44,14 @@ class SlideButton(QtGui.QLabel, object):
         if not self.image_path:
             return
 
-        pil_image = Image.open(self.image_path)
-        qt_image = ImageQt.ImageQt(pil_image).copy()
-        self._image = QtGui.QPixmap.fromImage(qt_image)
+        _, ext = os.path.splitext(self.image_path)
+        if ext.lower() == ".jpg" or ext.lower() == ".jpeg":
+            # Workaround for JPEG images
+            pil_image = Image.open(self.image_path)
+            qt_image = ImageQt.ImageQt(pil_image).copy()
+            self._image = QtGui.QPixmap.fromImage(qt_image)
+        else:
+            self._image = QtGui.QPixmap(self.image_path)
 
     def sizeHint(self):
         return QtCore.QSize(200, self.heightForWidth(200))

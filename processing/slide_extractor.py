@@ -132,8 +132,7 @@ class SlideExtractor(object):
                 dd = 0
                 if current_frame_descriptor is not None:
                     dd = self._get_descriptor_distance(current_frame_descriptor, frame_descriptor)
-                if current_frame_descriptor is None or \
-                    dd > self._treshold:
+                if current_frame_descriptor is None or dd > self._treshold:
                     # Save frame to disk
                     cv_original_frame = cv.CreateImage((frame.width, frame.height), cv.IPL_DEPTH_8U, 3)
                     cv.SetData(cv_original_frame, frame.data, frame.width * 3)
