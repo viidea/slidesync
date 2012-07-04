@@ -6,12 +6,10 @@ from audiosync import sync, utils, correlate
 def work(f1, f2):
     print "Loading first audio..."
     file1_audio, file1_orig_sr = utils.get_audio_from_file(f1)
-    file1_audio = file1_audio[0:file1_orig_sr * 3600]
     print "Preprocessing first audio..."
     file1_audio, file1_sr = sync.preprocess_audio(file1_audio, file1_orig_sr, bandpass=False)
     print "Loading second audio..."
     file2_audio, file2_orig_sr = utils.get_audio_from_file(f2)
-    file2_audio = file2_audio[0:file2_orig_sr * 3600]
     print "Preprocessing second audio..."
     file2_audio, file2_sr = sync.preprocess_audio(file2_audio, file2_orig_sr, bandpass=False)
 

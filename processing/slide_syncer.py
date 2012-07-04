@@ -14,14 +14,11 @@ class SlideSyncer(object):
         logger.debug("Loading files %s and %s" % (self.original_video_file, self.slide_video_file))
         # Load audio files first
         original_audio, original_file_sr = utils.get_audio_from_file(self.original_video_file)
-        original_audio = original_audio[0:original_file_sr * 3600]
         original_audio, original_sr = sync.preprocess_audio(original_audio, original_file_sr, bandpass=False)
-        # Truncate the audio file to 1 hour to lower memory usage
 
         slide_audio, original_slide_sr = utils.get_audio_from_file(self.slide_video_file)
-        slide_audio = slide_audio[0:original_slide_sr*3600]
         slide_audio, slide_sr = sync.preprocess_audio(slide_audio, original_slide_sr, bandpass=False)
-        # Truncate audio file to 1 hour to lower memory usage
+
         assert original_file_sr == original_slide_sr
 
         if self.global_method:
@@ -43,7 +40,7 @@ class SlideSyncer(object):
         return updated_slides
 
     def _get_synced_timings_global(self, slide_data, original_audio, slide_audio, samplerate):
-        global_offset, corr = correlate.get_offset(original_audio, slide_audio, samplerate)
+        global_offset = correlate.get_offset(original_audio, slide_audio, samplerate)
         logger.info("Found offset %s", global_offset)
 
         updated_slides = []
