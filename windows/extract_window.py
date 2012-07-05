@@ -41,5 +41,5 @@ class ExtractWindow(extract_dialog.Ui_dlgExtract, QtGui.QDialog):
             self._app.processEvents()
 
     def _update_treshold_label(self):
-        self._treshold = self.sldTreshold.value()
+        self._treshold = float(self.sldTreshold.value()) / 10
         self.lblTresh.setText(str(self._treshold))
