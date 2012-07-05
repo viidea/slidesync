@@ -1,8 +1,9 @@
 from distutils.core import setup
 import py2exe
+import datetime
 
 setup(name="slidesync",
-      version="0.1",
+      version=datetime.date.today().strftime("%Y.%m.%d"),
       modules=["audiosync", "processing", "pyvideo", "widgets", "windows"],
       windows=[{
           "script":"main.py",
