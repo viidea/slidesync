@@ -1,6 +1,7 @@
 from PyQt4 import QtGui, QtCore
 import logging
 import os
+import sys
 from PyQt4.QtGui import QMessageBox, QDialog
 from processing.slide_syncer import SlideSyncer
 from processing.utils import package_slides
@@ -37,6 +38,20 @@ class MainWindow(main_window.Ui_MainWindow, QtGui.QMainWindow):
         self.setupUi(self)
         self.btnStart.clicked.connect(self._process)
         self._state = ProcessingState()
+        self._show_version()
+
+    def _show_version(self):
+        self.lblVersion.setText("")
+        # Check if this is running from py2exe
+        if hasattr(sys, "frozen"):
+            exe_path = unicode(sys.executable, sys.getfilesystemencoding())
+            try:
+                from win32com.client import Dispatch
+                ver_parser = Dispatch('Scripting.FileSystemObject')
+                info = ver_parser.GetFileVersion(exe_path)
+                self.lblVersion.setText(info)
+            except:
+                return
 
     def _process(self):
         self.btnStart.setEnabled(False)
