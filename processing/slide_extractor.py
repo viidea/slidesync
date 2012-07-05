@@ -51,12 +51,46 @@ class ImageSave(Thread):
 
 class SlideExtractor(object):
     FRAME_SKIP = 10
+    _threshold = 0.9
 
-    def __init__(self, video_file, cropbox=None, callback=None, treshold=50):
+    def __init__(self, video_file, cropbox=None, callback=None, treshold=0.9):
         self._video_file = video_file
         self._callback = callback
         self._cropbox = cropbox
         self._treshold = treshold
+
+    def _smooth(self, x,beta):
+         """ kaiser window smoothing """
+         window_len=5
+         # extending the data at beginning and at the end
+         # to apply the window at the borders
+         s = numpy.r_[x[window_len-1:0:-1],x,x[-1:-window_len:-1]]
+         w = numpy.kaiser(window_len,beta)
+         y = numpy.convolve(w/w.sum(),s,mode='valid')
+         return y[2:len(y)-2]
+
+    def _get_diff_peaks(self, diff_signal):
+        if diff_signal[0] == 2**30:
+            del diff_signal[0]
+
+        std_dev = numpy.std(diff_signal)
+        # Do tresholding to remove noise
+        diff_signal = numpy.where(diff_signal > self._threshold * std_dev, diff_signal, 0)
+        peaks = self._find_peaks(diff_signal)
+        return peaks
+
+
+    def _find_peaks(self, x):
+        peaks = []
+        prev_diff = -1
+
+        for i in range(len(x) - 1):
+            diff = x[i] - x[i+1]
+            if diff > 0 and prev_diff < 0:
+                peaks.append(i + 1)
+            prev_diff = diff
+
+        return numpy.asarray(peaks)
 
     def extract_slides(self):
         self.tmp_dir = self._create_temp_dir()
@@ -116,7 +150,7 @@ class SlideExtractor(object):
             self._send_callback(timestamp)
 
         self._send_callback(0)
-        peaks_idx = set(_get_diff_peaks([val for _, val in diff_signal]))
+        peaks_idx = set(self._get_diff_peaks([val for _, val in diff_signal]))
         logger.info("Found peaks: %s", peaks_idx)
 
         # Transform list indexes to frame counter numbers
@@ -173,36 +207,3 @@ class SlideExtractor(object):
                 self._callback(0, max=0, min=0)
             else:
                 self._callback(timestamp, max=self._video_file.get_info().duration)
-
-def _get_diff_peaks(diff_signal):
-    if diff_signal[0] == 2**30:
-        del diff_signal[0]
-
-    std_dev = numpy.std(diff_signal)
-    # Do tresholding to remove noise
-    diff_signal = numpy.where(diff_signal > 0.5 * std_dev, diff_signal, 0)
-    peaks = _find_peaks(diff_signal)
-    return peaks
-
-def _find_peaks(x):
-    peaks = []
-    prev_diff = -1
-
-    for i in range(len(x) - 1):
-        diff = x[i] - x[i+1]
-        if diff > 0 and prev_diff < 0:
-            peaks.append(i)
-
-        prev_diff = diff
-
-    return numpy.asarray(peaks)
-
-def _smooth(x,beta):
-     """ kaiser window smoothing """
-     window_len=5
-     # extending the data at beginning and at the end
-     # to apply the window at the borders
-     s = numpy.r_[x[window_len-1:0:-1],x,x[-1:-window_len:-1]]
-     w = numpy.kaiser(window_len,beta)
-     y = numpy.convolve(w/w.sum(),s,mode='valid')
-     return y[2:len(y)-2]
