@@ -14,13 +14,17 @@ class SlideSyncer(object):
         logger.debug("Loading files %s and %s" % (self.original_video_file, self.slide_video_file))
         # Load audio files first
         original_audio, original_file_sr = utils.get_audio_from_file(self.original_video_file)
+        logger.debug("Loaded original file %s, preprocessing...", self.original_video_file)
         original_audio, original_sr = sync.preprocess_audio(original_audio, original_file_sr, bandpass=False)
-
+        logger.debug("Done.")
         slide_audio, original_slide_sr = utils.get_audio_from_file(self.slide_video_file)
+        logger.debug("Loaded slide file %s, preprocessing...", self.slide_video_file)
         slide_audio, slide_sr = sync.preprocess_audio(slide_audio, original_slide_sr, bandpass=False)
+        logger.debug("Done.")
 
         assert original_file_sr == original_slide_sr
 
+        logger.debug("Load done, calculating sync timings...")
         if self.global_method:
             updated_slides = self._get_synced_timings_global(slide_data, original_audio, slide_audio, slide_sr)
         else:

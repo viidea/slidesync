@@ -2,6 +2,7 @@ import logging
 import multiprocessing
 import sys
 from PyQt4 import QtGui
+import numpy
 from windows.main_window import MainWindow
 
 logger = logging.getLogger(__name__)
@@ -19,4 +20,5 @@ def main():
 
 if __name__ == "__main__":
     multiprocessing.freeze_support()
+    numpy.seterr(all='raise')
     main()

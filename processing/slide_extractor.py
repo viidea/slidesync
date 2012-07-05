@@ -191,6 +191,7 @@ class SlideExtractor(object):
 
             self._send_callback(timestamp)
 
+        image_save_thread.done = True
         return slides
 
     def _create_temp_dir(self):
