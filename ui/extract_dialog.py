@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'extract_dialog.ui'
 #
-# Created: Wed May 23 12:27:37 2012
+# Created: Thu Jul  5 10:44:43 2012
 #      by: PyQt4 UI code generator 4.9.1
 #
 # WARNING! All changes made in this file will be lost!
@@ -40,14 +40,15 @@ class Ui_dlgExtract(object):
         self.horizontalLayout.addWidget(self.lblTresh)
         self.verticalLayout.addLayout(self.horizontalLayout)
         self.sldTreshold = QtGui.QSlider(dlgExtract)
-        self.sldTreshold.setMinimum(10)
-        self.sldTreshold.setMaximum(300)
-        self.sldTreshold.setSingleStep(5)
-        self.sldTreshold.setPageStep(25)
-        self.sldTreshold.setSliderPosition(50)
+        self.sldTreshold.setMinimum(2)
+        self.sldTreshold.setMaximum(12)
+        self.sldTreshold.setSingleStep(1)
+        self.sldTreshold.setPageStep(5)
+        self.sldTreshold.setProperty("value", 7)
+        self.sldTreshold.setSliderPosition(7)
         self.sldTreshold.setOrientation(QtCore.Qt.Horizontal)
         self.sldTreshold.setTickPosition(QtGui.QSlider.TicksBelow)
-        self.sldTreshold.setTickInterval(10)
+        self.sldTreshold.setTickInterval(2)
         self.sldTreshold.setObjectName(_fromUtf8("sldTreshold"))
         self.verticalLayout.addWidget(self.sldTreshold)
         spacerItem = QtGui.QSpacerItem(20, 40, QtGui.QSizePolicy.Minimum, QtGui.QSizePolicy.Expanding)
