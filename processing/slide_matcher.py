@@ -61,13 +61,13 @@ class SlideMatcher(object):
         return self._calculate_distance_matrix()
 
     def _extract_features(self, slides):
-        surf = cv2.SURF(_hessianThreshold=150)
+        surf = cv2.SURF(hessianThreshold=150)
         #numpy.seterr(all="raise")
         for i in range(0, len(slides.values())):
             slide = slides.values()[i]
             logger.debug("Extracting from %s..." % slide.image_path)
             image = cv2.imread(slide.image_path, cv2.CV_LOAD_IMAGE_GRAYSCALE)
-            keypoints, descriptors = surf.detect(image, None, False)
+            keypoints, descriptors = surf.detect(image, None, None)
             # Reshape descriptors so they'll make sense
             if not len(descriptors) == 0:
                 descriptors.shape = (-1, surf.descriptorSize())
