@@ -1,8 +1,7 @@
-from collections import defaultdict
 import logging
 import cv2
 import numpy
-import pyflann
+
 
 logger = logging.getLogger(__name__)
 
@@ -61,7 +60,7 @@ class SlideMatcher(object):
         return self._calculate_distance_matrix()
 
     def _extract_features(self, slides):
-        surf = cv2.SURF(hessianThreshold=150)
+        surf = cv2.SURF(hessianThreshold=80, extended=False)
         #numpy.seterr(all="raise")
         for i in range(0, len(slides.values())):
             slide = slides.values()[i]
@@ -83,44 +82,30 @@ class SlideMatcher(object):
     def _calculate_distance_matrix(self):
         mapping, flann_index = self._get_flann_index(self.image_slides)
 
-        results = []
+        matches = {}
         for v_time, v_slide in self.video_slides.items():
             # Use FLANN detector to find nearest neighbours
-            neighbours = self._get_nearest_neighbours_flann(flann_index, v_slide.descriptors, -1)
-
-            counts = defaultdict(int)
-            for neighbour in neighbours:
-                counts[mapping[neighbour[1]]] += 1
-            list = [(val, self.image_slides[idx].timing) for idx, val in counts.items()]
-            results.append((v_slide.timing, sorted(list)))
-
-        matches = {}
-        for timing, data in results:
-            matches[timing] = sorted(data)[-1][1]
+            nearest_image = self._get_nearest_image_flann(flann_index, v_slide.descriptors, -1)
+            matches[v_slide.timing] = self.image_slides[nearest_image].timing
         return matches
 
 
     def _get_flann_index(self, images):
-        descriptors = tuple([image.descriptors for i_num, image in images.items()])
-
-        # Stack descriptors together
-        stack = numpy.vstack(descriptors)
-
+        flann_params = dict(algorithm = 1,  # FLANN_INDEX_LSH
+                           trees = 4)
+        matcher = cv2.FlannBasedMatcher(flann_params, {})
         mapping = {}
-        idx = 0
+
+        logger.debug("Calculating FLANN index for %d images...", len(images))
         for i_num, image in images.items():
-            for i in range(0, len(image.descriptors)):
-                mapping[idx] = i_num
-                idx += 1
+            matcher.add([image.descriptors])
 
-        flann = pyflann.FLANN()
-        index = flann.build_index(stack, algorithm="kmeans", branching=32, iterations=10)
-        return mapping, (flann, index)
+        matcher.train()
+        return mapping, matcher
 
-    def _get_nearest_neighbours_flann(self, index, descriptors, treshold = 0.6):
-        # Build index
-        flann, index_params = index
-        indices, distances = flann.nn_index(descriptors, 2, checks=index_params["checks"]) # Find 2 nearest neighbours for each point
-        indices1 = numpy.arange(len(descriptors))                          # Prepare indexes for zip
-        pairs = zip(indices1, indices[:, 0], distances[:, 0], distances[:,0] / (distances[:,1] + numpy.finfo(float).eps)) # Build pairs of indexes with first neighbour with distance
-        return filter(lambda item: item[3] > treshold, pairs)
+    def _get_nearest_image_flann(self, matcher, descriptors, threshold = 0.6):
+        matches = matcher.knnMatch(descriptors, 2) # Find descriptor matches
+        # Queue all images which have matches with distance difference greater than threshold
+        images = [m[0].imgIdx for m in matches if len(m) == 2 and (m[0].distance / m[1].distance) > threshold]
+        # Return image index with most occuriences
+        return max(set(images), key=images.count)
