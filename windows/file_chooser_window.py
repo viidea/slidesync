@@ -20,8 +20,6 @@ class FileChooserWindow(QtGui.QDialog, file_chooser_dialog.Ui_Dialog):
         self.cmbSlideVideo.activated.connect(self._crop_slide_video)
         self.cmbSlideDirectory.currentIndexChanged.connect(self._check_values)
         self.cmbRenderedVideo.currentIndexChanged.connect(self._check_values)
-
-        self.buttonBox.button(QDialogButtonBox.Ok).clicked.connect(self._pre_close)
         self._load_settings()
 
     def _select_slide_video(self):
@@ -49,9 +47,25 @@ class FileChooserWindow(QtGui.QDialog, file_chooser_dialog.Ui_Dialog):
         self._cropbox = crop_window.selected
         self._check_values()
 
-    def _pre_close(self):
+    def _check_video_samplerate(self):
+        video1 = VideoFile(unicode(self.cmbRenderedVideo.itemText(self.cmbRenderedVideo.currentIndex())))
+        video2 = VideoFile(unicode(self.cmbSlideVideo.itemText(self.cmbSlideVideo.currentIndex())))
+
+        if video1.get_info().audio_samplerate != video2.get_info().audio_samplerate:
+            msgbox = QMessageBox(QMessageBox.Critical, "Bad videos", "Audio samplerate must be the same for both videos!")
+            msgbox.setDetailedText("Sample rate of audio tracks in both video has to be the same, e.g. 48000Hz for both.")
+            msgbox.exec_()
+            return False
+
+        return True
+
+    def accept(self):
+        if not self._check_video_samplerate():
+            return
+
         if self._cropbox is None:
             self._crop_slide_video(self.cmbSlideVideo.currentIndex())
+        self.done(QtGui.QDialog.Accepted)
 
     def _select_slide_directory(self):
         dirname = QtGui.QFileDialog().getExistingDirectory(self, "Open slide directory", QtCore.QDir().homePath())
