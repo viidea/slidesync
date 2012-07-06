@@ -1,6 +1,7 @@
 from PyQt4 import QtGui, QtCore
 import logging
 import os
+import re
 import sys
 from PyQt4.QtGui import QMessageBox, QDialog
 from processing.slide_syncer import SlideSyncer
@@ -87,8 +88,12 @@ class MainWindow(main_window.Ui_MainWindow, QtGui.QMainWindow):
         _, _, dirname = self._state.files
         image_slides = []
         num = 0
+
+        # Tools for natural string sorting
+        convert = lambda text: int(text) if text.isdigit() else text
+        alphanum_key = lambda key: [convert(c) for c in re.split('([0-9]+)', key)]
         try:
-            for file in sorted(os.listdir(dirname)):
+            for file in sorted(os.listdir(dirname), key=alphanum_key):
                 filename, extension = os.path.splitext(file)
                 if extension.lower() == ".png" or extension.lower() == ".jpg":
                     image_slides.append((num, os.path.join(dirname, file)))
