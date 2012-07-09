@@ -1,9 +1,13 @@
 from PyQt4 import QtGui, QtCore
+import logging
+import os
 from PyQt4.QtGui import QDialogButtonBox, QMessageBox
 import settings
 from ui import file_chooser_dialog
 from video import VideoFile, VideoLoadException
 from windows.load_video_window import LoadVideoWindow
+
+logger = logging.getLogger(__name__)
 
 class FileChooserWindow(QtGui.QDialog, file_chooser_dialog.Ui_Dialog):
     _cropbox = None
@@ -86,6 +90,9 @@ class FileChooserWindow(QtGui.QDialog, file_chooser_dialog.Ui_Dialog):
         self._check_values()
 
     def _check_values(self):
+        self._show_video_thumbnail(self.cmbRenderedVideo.currentText(), self.renderedPreview)
+        self._show_video_thumbnail(self.cmbSlideVideo.currentText(), self.slideVideoPreview)
+        self._show_slide_thumbnail(self.cmbSlideDirectory.currentText(), self.slidePreview)
         if len(unicode(self.cmbRenderedVideo.currentText()).strip()) > 0 and \
            len(unicode(self.cmbSlideVideo.currentText()).strip()) > 0 and \
            len(unicode(self.cmbSlideDirectory.currentText()).strip()) > 0:
@@ -127,3 +134,25 @@ class FileChooserWindow(QtGui.QDialog, file_chooser_dialog.Ui_Dialog):
 
         for i in range(0, len(recent_slide_dirs)):
                     self.cmbSlideDirectory.insertItem(i, recent_slide_dirs[i])
+
+    def _show_video_thumbnail(self, path, widget):
+        try:
+            video = VideoFile(path)
+            video.seek_to(20)
+            timestamp, frame = video.get_next_frame()
+            image = QtGui.QImage(frame.data, frame.width, frame.height, QtGui.QImage.Format_RGB888).scaledToWidth(widget.width())
+            pixmap = QtGui.QPixmap.fromImage(image)
+            widget.setPixmap(pixmap)
+        except Exception as e:
+            logger.error(e)
+            return
+
+    def _show_slide_thumbnail(self, path, widget):
+        try:
+            file = filter(lambda s: s.find(".jpg") >= 0 or s.find(".png") >= 0, os.listdir(unicode(path)))[0]
+            image = QtGui.QImage(os.path.join(unicode(path), unicode(file))).scaledToWidth(widget.width())
+            pixmap = QtGui.QPixmap.fromImage(image)
+            widget.setPixmap(pixmap)
+        except Exception as e:
+            logger.error(e)
+            return
